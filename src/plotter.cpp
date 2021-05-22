@@ -2,10 +2,16 @@
 
 Plotter::Plotter() : _window(sf::RenderWindow(sf::VideoMode(PARAMS::WINDOW_SIZE_X,\
 				PARAMS::WINDOW_SIZE_Y), "plot", sf::Style::Close)) {
+	/* default values */
 	_xLabel = "";
 	_yLabel = "";
 	_title = "";
 	_axesThickness = 2;
+
+	if(!_font.loadFromFile("../res/arial.ttf")){
+		std::cerr << "Error loading font! Exiting...\n";
+		exit(1);
+	}
 }
 
 Plotter::~Plotter(){}
@@ -29,6 +35,10 @@ void Plotter::yLabel(const std::string yTitle){
 	_yLabel = yTitle;
 }
 
+void Plotter::title(const std::string uTitle){
+	_title = uTitle;
+}
+
 void Plotter::candleSticks(){
 	genPlot();
 }
@@ -36,9 +46,9 @@ void Plotter::candleSticks(){
 void Plotter::genPlot(){
 	std::vector<sf::RectangleShape> axes = createAxes();
 //	createDivisions();
-//	createLabels();
-//	createTitle();
-	display(axes);
+	std::vector<sf::Text> labels = createLabels();
+	sf::Text title = createTitle();
+	display(axes, labels, title);
 }
 
 std::vector<sf::RectangleShape> Plotter::createAxes(){
@@ -63,13 +73,36 @@ std::vector<sf::RectangleShape> Plotter::createAxes(){
 
 	if ( _axesThickness > 1)
 		v.back().setOrigin( 0, float(_axesThickness/2) );
-	v.back().setSize(sf::Vector2f(axesLengthX, _axesThickness));
+	v.back().setSize(sf::Vector2f(axesLengthY, _axesThickness));
 	v.back().setRotation(-90.0);
 
 	return v;
 }
 
-void Plotter::display(const std::vector<sf::RectangleShape> &axes){
+std::vector<sf::Text> Plotter::createLabels(){
+	std::vector<sf::Text> v;
+
+	/* xlabel */
+	v.push_back(sf::Text( _xLabel, _font, PARAMS::LABEL_SIZE_X));
+	v.back().setPosition(sf::Vector2f(PARAMS::WINDOW_SIZE_X/2, PARAMS::WINDOW_SIZE_Y - PARAMS::OFFSET_Y/2 - PARAMS::LABEL_SIZE_X));
+//	v.back().setOrigin( v.back().getGlobalBounds().width/2 ,PARAMS::LABEL_SIZE_X/2);
+
+	/* y label */
+	v.push_back(sf::Text( _yLabel, _font, PARAMS::LABEL_SIZE_Y));
+	v.back().setPosition(sf::Vector2f(PARAMS::OFFSET_X/2, PARAMS::WINDOW_SIZE_Y/2 - PARAMS::OFFSET_Y/2));
+//	v.back().setOrigin( v.back().getGlobalBounds().width/2 ,PARAMS::LABEL_SIZE_Y/2);
+	v.back().setRotation(-90.0);
+
+	return v;
+}
+
+sf::Text Plotter::createTitle(){
+	sf::Text t(_title, _font, PARAMS::TITLE_SIZE); 
+	t.setPosition( sf::Vector2f(PARAMS::WINDOW_SIZE_X/2 - t.getLocalBounds().width/2, PARAMS::OFFSET_Y ) );
+	return t;
+}
+void Plotter::display(const std::vector<sf::RectangleShape> &axes, const std::vector<sf::Text> &labels,\
+		const sf::Text &title){
 	_window.setPosition(
 			sf::Vector2i(
 				int( sf::VideoMode::getDesktopMode().width/2 - PARAMS::WINDOW_SIZE_X/2 ), 
@@ -87,6 +120,9 @@ void Plotter::display(const std::vector<sf::RectangleShape> &axes){
 		_window.clear();
 		_window.draw(axes[0]);
 		_window.draw(axes[1]);
+		_window.draw(labels[0]);
+		_window.draw(labels[1]);
+		_window.draw(title);
 		_window.display();
 	}
 }

@@ -26,10 +26,12 @@ class Plotter{
 		unsigned _axesThickness;	
 		bool _gridsOn;
 		sf::RenderWindow _window;
+		sf::Font _font;
 
 		std::vector<sf::RectangleShape> createAxes();
 //		std::vector<sf::RectangleShape> createDivisions();
-//		std::vector<sf::Text> createLabels();
-//		sf::Text createTitle();
-		void display( const std::vector<sf::RectangleShape> &axes);
+		std::vector<sf::Text> createLabels();
+		sf::Text createTitle();
+		void display(const std::vector<sf::RectangleShape> &axes, const std::vector<sf::Text> &labels,\
+						const sf::Text &title);
 };
