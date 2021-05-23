@@ -103,7 +103,7 @@ std::vector<Candlestick> Plotter::getCandlesticks(){
 	for( unsigned i = 0; i < _xData.size(); ++i){
 		double yPixelLoc = getOrigin().y -  _pixelScaleMultiplier * (_yData[i][1] - _ymin); // data high passed bc bounding box origin is at top-left.
 		v.push_back(Candlestick(_yData[i][0], _yData[i][1], _yData[i][2],\
-					_yData[i][3], _font, Pos(i*_xScaleFactor , yPixelLoc), getOrigin(), _pixelScaleMultiplier));
+					_yData[i][3], _font, Pos(getOrigin().x + i*_xScaleFactor , yPixelLoc), getOrigin(), _pixelScaleMultiplier));
 	}
 	return v;
 }	
