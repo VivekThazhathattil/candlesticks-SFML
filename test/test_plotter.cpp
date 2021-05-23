@@ -6,7 +6,7 @@ int main(){
 	plot.fetchData(filePath);
 	plot.xLabel("Test label x");
 	plot.yLabel("Test label y");
-	plot.title("Test Title");
+	plot.title("TATASTEEL.NS");
 	plot.candleSticks();
 	return 0;
 }

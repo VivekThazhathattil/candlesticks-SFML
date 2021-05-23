@@ -1,4 +1,5 @@
 #include "../include/plotter.h"
+// TODO: pause when off focus
 
 Plotter::Plotter() : _window(sf::RenderWindow(sf::VideoMode(PARAMS::WINDOW_SIZE_X,\
 				PARAMS::WINDOW_SIZE_Y), "plot", sf::Style::Close)) {
@@ -88,7 +89,7 @@ double Plotter::getMinimumYData() const{
 	double min = 1000000;
 	for(unsigned i = 0; i < _yData.size(); ++i){
 		if ( _yData[i][2] < min)
-			min = _yData[i][1];
+			min = _yData[i][2];
 	}
 	return min;
 }
@@ -204,6 +205,7 @@ void Plotter::display(const std::vector<sf::RectangleShape> &axes, const std::ve
 				int( sf::VideoMode::getDesktopMode().height/2 - PARAMS::WINDOW_SIZE_Y/2 )
 				)
 			);
+	_window.setFramerateLimit(PARAMS::FRAME_LIMIT);
 
 	while(_window.isOpen()){
 		sf::Event e;
@@ -212,7 +214,7 @@ void Plotter::display(const std::vector<sf::RectangleShape> &axes, const std::ve
 			if (e.type == sf::Event::Closed)
 				_window.close();
 		}
-		_window.clear();
+		_window.clear(sf::Color(12,14,16));
 		_window.draw(axes[0]);
 		_window.draw(axes[1]);
 		for(unsigned i = 0; i < div.size(); ++i)
