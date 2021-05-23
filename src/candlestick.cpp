@@ -1,13 +1,17 @@
 #include "../include/candlestick.h"
 
 Candlestick::Candlestick(const double &o, const double &h, const double &l,\
-	const double &c, const sf::Font &font, const Pos &pos, const Pos &origin, const double &pixelScaleMultiplier){
+	const double &c, sf::Font &font, const Pos &pos, const Pos &origin, const double &pixelScaleMultiplier,\
+	const Pos &textPos){
 	_open = o;
 	_high = h;
 	_low = l;
 	_close = c;
+	_det.setFont(font);
+
 	createBody(pos, origin, pixelScaleMultiplier);
 	createWick(pos, origin, pixelScaleMultiplier);
+	createText(textPos);
 }
 Candlestick::~Candlestick(){}
 
@@ -31,5 +35,14 @@ void Candlestick::createWick(const Pos &pos, const Pos &origin, const double &pi
 	_wick.setSize(sf::Vector2f(PARAMS::CANDLESTICK_WICK_WIDTH, wickHeight));
 	_wick.setFillColor(sf::Color(120,120,121));
 }
-void Candlestick::createText(){
+void Candlestick::createText(const Pos &pos){
+	_det.setCharacterSize(PARAMS::LABEL_SIZE_X);
+	_det.setString("O: " + std::to_string(int(_open)) +\
+			"\nH: " + std::to_string(int(_high)) +\
+			"\nL: " + std::to_string(int(_low)) +\
+			"\nC: " + std::to_string(int(_close)));
+	_det.setPosition(sf::Vector2f(pos.x - _det.getLocalBounds().width -PARAMS::OFFSET_X, pos.y - _det.getLocalBounds().height - PARAMS::OFFSET_Y));
+}
+bool Candlestick::mouseInCandleStick(const Pos &pos) const{
+	return (_wick.getGlobalBounds().contains(sf::Vector2f(pos.x, pos.y)) || _body.getGlobalBounds().contains(sf::Vector2f(pos.x, pos.y)));
 }

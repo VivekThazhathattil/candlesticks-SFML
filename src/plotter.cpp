@@ -1,7 +1,5 @@
 #include "../include/plotter.h"
-// TODO: show horizontal grid lines
-// TODO: show vertical grid lines
-// TODO: fix the number of divisions on the axes lines to 5 each
+// TODO: show OHLC text when mouse arrow is inside each candle
 
 Plotter::Plotter() : _window(sf::RenderWindow(sf::VideoMode(PARAMS::WINDOW_SIZE_X,\
 				PARAMS::WINDOW_SIZE_Y), "plot", sf::Style::Close)) {
@@ -75,8 +73,7 @@ void Plotter::genPlot(const std::string param){
 
 std::vector<sf::Text> Plotter::getYDivisionLabels() const{
 	std::vector<sf::Text> v;
-	for(unsigned i = 0; i < PARAMS::NUM_DIVS_Y; ++i){
-		v.push_back(sf::Text());
+	for(unsigned i = 0; i < PARAMS::NUM_DIVS_Y+1; ++i){ v.push_back(sf::Text());
 		v.back().setFont(_font);
 		v.back().setString(std::to_string(int(_ymin + i*(_ymax - _ymin)/PARAMS::NUM_DIVS_Y)));
 		v.back().setFillColor(sf::Color(124,128,133));
@@ -91,14 +88,14 @@ std::vector<sf::RectangleShape> Plotter::createGridLines() const{
 	std::vector<sf::RectangleShape> v;	
 	/* for horizontal lines */
 	Pos origin = getOrigin();
-	for(unsigned i = 0; i < PARAMS::NUM_DIVS_Y; ++i){
+	for(unsigned i = 0; i < PARAMS::NUM_DIVS_Y+1; ++i){
 		v.push_back(sf::RectangleShape());
 		v.back().setPosition(origin.x, origin.y - i*_yScaleFactor);
 		v.back().setFillColor(sf::Color(30,33,42));
 		v.back().setSize(sf::Vector2f(getAxesLength().x, 2));
 	}
 
-	for(unsigned i = 0; i < PARAMS::NUM_DIVS_X; ++i){
+	for(unsigned i = 0; i < PARAMS::NUM_DIVS_X+1; ++i){
 		v.push_back(sf::RectangleShape());
 		v.back().setPosition(origin.x + i*_xScaleFactor, origin.y);
 		v.back().setFillColor(sf::Color(30,33,42));
@@ -142,7 +139,7 @@ std::vector<Candlestick> Plotter::getCandlesticks(){
 	for( unsigned i = 0; i < _xData.size(); ++i){
 		double yPixelLoc = getOrigin().y -  _pixelScaleMultiplier * (_yData[i][1] - _ymin); // data high passed bc bounding box origin is at top-left.
 		v.push_back(Candlestick(_yData[i][0], _yData[i][1], _yData[i][2],\
-					_yData[i][3], _font, Pos(getOrigin().x + i*getAxesLength().x/_xData.size() , yPixelLoc), getOrigin(), _pixelScaleMultiplier));
+					_yData[i][3], _font, Pos(getOrigin().x + i*getAxesLength().x/_xData.size() , yPixelLoc), getOrigin(), _pixelScaleMultiplier, Pos(getOrigin().x + getAxesLength().x, getOrigin().y)));
 	}
 	return v;
 }	
@@ -214,12 +211,13 @@ std::vector<sf::Text> Plotter::createLabels(){
 
 	/* xlabel */
 	v.push_back(sf::Text( _xLabel, _font, PARAMS::LABEL_SIZE_X));
-	v.back().setPosition(sf::Vector2f(PARAMS::WINDOW_SIZE_X/2, PARAMS::WINDOW_SIZE_Y - PARAMS::OFFSET_Y/2 - PARAMS::LABEL_SIZE_X));
+	v.back().setPosition(sf::Vector2f(getOrigin().x + getAxesLength().x/2 - v.back().getLocalBounds().width/2 , getOrigin().y + PARAMS::OFFSET_Y));
 //	v.back().setOrigin( v.back().getGlobalBounds().width/2 ,PARAMS::LABEL_SIZE_X/2);
 
 	/* y label */
 	v.push_back(sf::Text( _yLabel, _font, PARAMS::LABEL_SIZE_Y));
-	v.back().setPosition(sf::Vector2f(PARAMS::OFFSET_X/2, PARAMS::WINDOW_SIZE_Y/2 - PARAMS::OFFSET_Y/2));
+	v.back().setOrigin(v.back().getLocalBounds().width/2, v.back().getLocalBounds().height/2);
+	v.back().setPosition(sf::Vector2f(getOrigin().x - v.back().getLocalBounds().height/2 - PARAMS::OFFSET_Y , getOrigin().y - getAxesLength().y/2));
 //	v.back().setOrigin( v.back().getGlobalBounds().width/2 ,PARAMS::LABEL_SIZE_Y/2);
 	v.back().setRotation(-90.0);
 
@@ -261,6 +259,8 @@ void Plotter::display(const std::vector<sf::RectangleShape> gridLines, const std
 		for(unsigned i = 0; i < cs.size(); ++i){
 			_window.draw(cs[i].getWick());
 			_window.draw(cs[i].getBody());
+			if(cs[i].mouseInCandleStick(Pos(sf::Mouse::getPosition(_window).x,sf::Mouse::getPosition(_window).y)))
+				_window.draw(cs[i].getText());
 		}
 
 		for(unsigned i = 0; i < yDivText.size(); ++i){
