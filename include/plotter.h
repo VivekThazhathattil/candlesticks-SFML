@@ -44,6 +44,8 @@ class Plotter{
 		double getMaximumYData() const;
 		double getMinimumYData() const;
 		void gatherAdditionalInfo(const std::string &param);
+		std::vector<sf::RectangleShape> createGridLines() const;
+		std::vector<sf::Text> getYDivisionLabels() const;
 		std::vector<sf::RectangleShape> createAxes();
 		Pos getOrigin() const;
 		AxesLength getAxesLength() const;
@@ -53,6 +55,8 @@ class Plotter{
 		sf::Text createTitle();
 		std::vector<Candlestick> getCandlesticks();
 		double getPixelSizeMultiplier();
-		void display(const std::vector<sf::RectangleShape> &axes, const std::vector<sf::Text> &labels,\
-			const sf::Text &title, const std::vector<sf::RectangleShape> &div, const std::vector<Candlestick> &cs);
+		void display(const std::vector<sf::RectangleShape> gridLines, const std::vector<sf::RectangleShape> &axes,\
+				const std::vector<sf::Text> yDivText, const std::vector<sf::Text> &labels, const sf::Text &title,\
+				const std::vector<sf::RectangleShape> &div,\
+				const std::vector<Candlestick> &cs);
 };

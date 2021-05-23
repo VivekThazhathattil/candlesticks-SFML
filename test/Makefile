@@ -9,3 +9,4 @@ clean:
 	rm -rf obj
 	rm -rf main
 	rm -rf errlog
+	rm -rf a.out

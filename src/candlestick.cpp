@@ -26,7 +26,7 @@ void Candlestick::createBody(const Pos &pos, const Pos &origin, const double &pi
 	}
 }
 void Candlestick::createWick(const Pos &pos, const Pos &origin, const double &pixelScaleMultiplier){
-	_wick.setPosition(pos.x + PARAMS::CANDLESTICK_BODY_WIDTH/2 , pos.y);
+	_wick.setPosition(pos.x + PARAMS::CANDLESTICK_BODY_WIDTH/2 - PARAMS::CANDLESTICK_WICK_WIDTH/2 , pos.y);
 	double wickHeight = fmax(pixelScaleMultiplier * abs(_high - _low), 1);
 	_wick.setSize(sf::Vector2f(PARAMS::CANDLESTICK_WICK_WIDTH, wickHeight));
 	_wick.setFillColor(sf::Color(120,120,121));

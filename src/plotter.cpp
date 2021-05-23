@@ -1,5 +1,7 @@
 #include "../include/plotter.h"
-// TODO: pause when off focus
+// TODO: show horizontal grid lines
+// TODO: show vertical grid lines
+// TODO: fix the number of divisions on the axes lines to 5 each
 
 Plotter::Plotter() : _window(sf::RenderWindow(sf::VideoMode(PARAMS::WINDOW_SIZE_X,\
 				PARAMS::WINDOW_SIZE_Y), "plot", sf::Style::Close)) {
@@ -61,12 +63,48 @@ void Plotter::genPlot(const std::string param){
 	std::vector<sf::RectangleShape> div = createDivisions(param);
 	std::vector<sf::Text> labels = createLabels();
 	sf::Text title = createTitle();
+	std::vector<sf::RectangleShape> gridLines = createGridLines();
 
 	if(param.compare("ohlc") == 0){
 		gatherAdditionalInfo(param);
+		std::vector<sf::Text> yDivText = getYDivisionLabels();
 		std::vector<Candlestick> candlesticks = getCandlesticks();
-		display(axes, labels, title, div, candlesticks);
+		display(gridLines, axes, yDivText, labels, title, div, candlesticks);
 	}
+}
+
+std::vector<sf::Text> Plotter::getYDivisionLabels() const{
+	std::vector<sf::Text> v;
+	for(unsigned i = 0; i < PARAMS::NUM_DIVS_Y; ++i){
+		v.push_back(sf::Text());
+		v.back().setFont(_font);
+		v.back().setString(std::to_string(int(_ymin + i*(_ymax - _ymin)/PARAMS::NUM_DIVS_Y)));
+		v.back().setFillColor(sf::Color(124,128,133));
+		v.back().setCharacterSize(PARAMS::DIV_TEXT_SIZE_X);
+		v.back().setOrigin(sf::Vector2f(0, v.back().getLocalBounds().height + PARAMS::OFFSET_Y/2));
+		v.back().setPosition(sf::Vector2f(getOrigin().x + PARAMS::OFFSET_X/2 , getOrigin().y - i*_yScaleFactor));
+	}
+	return v;
+}
+
+std::vector<sf::RectangleShape> Plotter::createGridLines() const{
+	std::vector<sf::RectangleShape> v;	
+	/* for horizontal lines */
+	Pos origin = getOrigin();
+	for(unsigned i = 0; i < PARAMS::NUM_DIVS_Y; ++i){
+		v.push_back(sf::RectangleShape());
+		v.back().setPosition(origin.x, origin.y - i*_yScaleFactor);
+		v.back().setFillColor(sf::Color(30,33,42));
+		v.back().setSize(sf::Vector2f(getAxesLength().x, 2));
+	}
+
+	for(unsigned i = 0; i < PARAMS::NUM_DIVS_X; ++i){
+		v.push_back(sf::RectangleShape());
+		v.back().setPosition(origin.x + i*_xScaleFactor, origin.y);
+		v.back().setFillColor(sf::Color(30,33,42));
+		v.back().setSize(sf::Vector2f(2, -getAxesLength().y));
+	}
+	return v;
 }
 
 void Plotter::gatherAdditionalInfo(const std::string &param){
@@ -104,7 +142,7 @@ std::vector<Candlestick> Plotter::getCandlesticks(){
 	for( unsigned i = 0; i < _xData.size(); ++i){
 		double yPixelLoc = getOrigin().y -  _pixelScaleMultiplier * (_yData[i][1] - _ymin); // data high passed bc bounding box origin is at top-left.
 		v.push_back(Candlestick(_yData[i][0], _yData[i][1], _yData[i][2],\
-					_yData[i][3], _font, Pos(getOrigin().x + i*_xScaleFactor , yPixelLoc), getOrigin(), _pixelScaleMultiplier));
+					_yData[i][3], _font, Pos(getOrigin().x + i*getAxesLength().x/_xData.size() , yPixelLoc), getOrigin(), _pixelScaleMultiplier));
 	}
 	return v;
 }	
@@ -147,21 +185,17 @@ std::vector<sf::RectangleShape> Plotter::createDivisions(const std::string &para
 	std::vector<sf::RectangleShape> v;
 	/* x divisions */
 	for(unsigned i = 0; i*_xScaleFactor < getAxesLength().x; ++i){
-		if (i%10 == 0){
-			v.push_back(sf::RectangleShape());
-			v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_X,1));
-			v.back().setPosition(getOrigin().x + i*_xScaleFactor, getOrigin().y);
-			v.back().setRotation(90.0);
-		}
+		v.push_back(sf::RectangleShape());
+		v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_X,1));
+		v.back().setPosition(getOrigin().x + i*_xScaleFactor, getOrigin().y);
+		v.back().setRotation(90.0);
 	};
 	/* y divisions */
 	for(unsigned i = 0; i*_yScaleFactor < getAxesLength().y; ++i){
-		if (i%10 == 0){
-			v.push_back(sf::RectangleShape());
-			v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_Y,1));
-			v.back().setPosition(getOrigin().x, getOrigin().y - i*_yScaleFactor);
-			v.back().setRotation(180.0);
-		}
+		v.push_back(sf::RectangleShape());
+		v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_Y,1));
+		v.back().setPosition(getOrigin().x, getOrigin().y - i*_yScaleFactor);
+		v.back().setRotation(180.0);
 	};
 	return v;
 }
@@ -169,8 +203,8 @@ std::vector<sf::RectangleShape> Plotter::createDivisions(const std::string &para
 void Plotter::calculateScaleFactor( const std::string &param){
 	if (param.compare("ohlc") == 0){ // calculate scalefactor for candlesticks case
 		std::cout << "Hello";
-		_xScaleFactor = getAxesLength().x / _xData.size();
-		_yScaleFactor = getAxesLength().y / _yData.size();
+		_xScaleFactor = getAxesLength().x / PARAMS::NUM_DIVS_X; // fix the number of divisions on each axes to 10
+		_yScaleFactor = getAxesLength().y / PARAMS::NUM_DIVS_Y;
 		
 	}
 }
@@ -197,8 +231,10 @@ sf::Text Plotter::createTitle(){
 	t.setPosition( sf::Vector2f(PARAMS::WINDOW_SIZE_X/2 - t.getLocalBounds().width/2, PARAMS::OFFSET_Y ) );
 	return t;
 }
-void Plotter::display(const std::vector<sf::RectangleShape> &axes, const std::vector<sf::Text> &labels,\
-		const sf::Text &title, const std::vector<sf::RectangleShape> &div, const std::vector<Candlestick> &cs){
+void Plotter::display(const std::vector<sf::RectangleShape> gridLines, const std::vector<sf::RectangleShape> &axes,\
+		const std::vector<sf::Text> yDivText, const std::vector<sf::Text> &labels, const sf::Text &title,\
+		const std::vector<sf::RectangleShape> &div,\
+		const std::vector<Candlestick> &cs){
 	_window.setPosition(
 			sf::Vector2i(
 				int( sf::VideoMode::getDesktopMode().width/2 - PARAMS::WINDOW_SIZE_X/2 ), 
@@ -215,6 +251,9 @@ void Plotter::display(const std::vector<sf::RectangleShape> &axes, const std::ve
 				_window.close();
 		}
 		_window.clear(sf::Color(12,14,16));
+		for(unsigned i = 0; i < gridLines.size(); ++i){
+			_window.draw(gridLines[i]);
+		}
 		_window.draw(axes[0]);
 		_window.draw(axes[1]);
 		for(unsigned i = 0; i < div.size(); ++i)
@@ -222,6 +261,10 @@ void Plotter::display(const std::vector<sf::RectangleShape> &axes, const std::ve
 		for(unsigned i = 0; i < cs.size(); ++i){
 			_window.draw(cs[i].getWick());
 			_window.draw(cs[i].getBody());
+		}
+
+		for(unsigned i = 0; i < yDivText.size(); ++i){
+			_window.draw(yDivText[i]);
 		}
 		_window.draw(labels[0]);
 		_window.draw(labels[1]);
