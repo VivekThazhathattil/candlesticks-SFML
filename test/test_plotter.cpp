@@ -7,6 +7,6 @@ int main(){
 	plot.xLabel("Test label x");
 	plot.yLabel("Test label y");
 	plot.title("Test Title");
-	plot.genPlot();
+	plot.candleSticks();
 	return 0;
 }

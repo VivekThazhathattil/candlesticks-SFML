@@ -1,8 +1,12 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <cassert>
 #include "params.h"
+#include "position.h"
 #include "dataHandler.h"
+#include "candlestick.h"
 
 class Plotter{
 	public:
@@ -14,7 +18,7 @@ class Plotter{
 		void xLabel(const std::string xTitle);
 		void yLabel(const std::string yTitle);
 		void title(const std::string uTitle);
-		void genPlot();
+		void genPlot(const std::string param);
 		void candleSticks();
 		
 	private:
@@ -25,13 +29,30 @@ class Plotter{
 		std::string _title;
 		unsigned _axesThickness;	
 		bool _gridsOn;
+		double _xScaleFactor; // num of pixels for one data point
+		double _yScaleFactor;
+		double _xstep;
+		double _ystep;
+		double _ymin;
+		double _ymax;
+		Pos _origin;
+		double _pixelScaleMultiplier;
+
 		sf::RenderWindow _window;
 		sf::Font _font;
 
+		double getMaximumYData() const;
+		double getMinimumYData() const;
+		void gatherAdditionalInfo(const std::string &param);
 		std::vector<sf::RectangleShape> createAxes();
-//		std::vector<sf::RectangleShape> createDivisions();
+		Pos getOrigin() const;
+		AxesLength getAxesLength() const;
+		std::vector<sf::RectangleShape> createDivisions(const std::string& param);
+		void calculateScaleFactor( const std::string &param);
 		std::vector<sf::Text> createLabels();
 		sf::Text createTitle();
+		std::vector<Candlestick> getCandlesticks();
+		double getPixelSizeMultiplier();
 		void display(const std::vector<sf::RectangleShape> &axes, const std::vector<sf::Text> &labels,\
-						const sf::Text &title);
+			const sf::Text &title, const std::vector<sf::RectangleShape> &div, const std::vector<Candlestick> &cs);
 };

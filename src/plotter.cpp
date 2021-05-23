@@ -7,6 +7,13 @@ Plotter::Plotter() : _window(sf::RenderWindow(sf::VideoMode(PARAMS::WINDOW_SIZE_
 	_yLabel = "";
 	_title = "";
 	_axesThickness = 2;
+	_xScaleFactor = 1;
+	_yScaleFactor = 1;
+	_xstep = 10;
+	_ystep = 10;
+	_ymax = -1;
+	_ymin = -1;
+	_pixelScaleMultiplier = -1;
 
 	if(!_font.loadFromFile("../res/arial.ttf")){
 		std::cerr << "Error loading font! Exiting...\n";
@@ -40,43 +47,131 @@ void Plotter::title(const std::string uTitle){
 }
 
 void Plotter::candleSticks(){
-	genPlot();
+	genPlot("ohlc");
 }
 
-void Plotter::genPlot(){
+void Plotter::genPlot(const std::string param){
+	if(_xData.empty() || _yData.empty()){
+		std::cerr << "Input data missing! Exiting..." << std::endl;
+		exit(1);
+	}
+
 	std::vector<sf::RectangleShape> axes = createAxes();
-//	createDivisions();
+	std::vector<sf::RectangleShape> div = createDivisions(param);
 	std::vector<sf::Text> labels = createLabels();
 	sf::Text title = createTitle();
-	display(axes, labels, title);
+
+	if(param.compare("ohlc") == 0){
+		gatherAdditionalInfo(param);
+		std::vector<Candlestick> candlesticks = getCandlesticks();
+		display(axes, labels, title, div, candlesticks);
+	}
+}
+
+void Plotter::gatherAdditionalInfo(const std::string &param){
+	if(param.compare("ohlc") == 0){
+		_ymax = getMaximumYData();
+		_ymin = getMinimumYData();
+		_pixelScaleMultiplier = getPixelSizeMultiplier();
+	}
+}
+
+double Plotter::getMaximumYData() const{
+	double max = -1;
+	for(unsigned i = 0; i < _yData.size(); ++i){
+		if ( _yData[i][1] > max)
+			max = _yData[i][1];
+	}
+	return max;
+}
+double Plotter::getMinimumYData() const{
+	double min = 1000000;
+	for(unsigned i = 0; i < _yData.size(); ++i){
+		if ( _yData[i][2] < min)
+			min = _yData[i][1];
+	}
+	return min;
+}
+
+double Plotter::getPixelSizeMultiplier(){
+	return getAxesLength().y / (_ymax - _ymin);
+}
+
+std::vector<Candlestick> Plotter::getCandlesticks(){
+	assert(_xData.size() == _yData.size());
+	std::vector<Candlestick> v;
+	for( unsigned i = 0; i < _xData.size(); ++i){
+		double yPixelLoc = getOrigin().y -  _pixelScaleMultiplier * (_yData[i][1] - _ymin); // data high passed bc bounding box origin is at top-left.
+		v.push_back(Candlestick(_yData[i][0], _yData[i][1], _yData[i][2],\
+					_yData[i][3], _font, Pos(i*_xScaleFactor , yPixelLoc), getOrigin(), _pixelScaleMultiplier));
+	}
+	return v;
+}	
+
+Pos Plotter::getOrigin() const { 
+	return Pos( PARAMS::OFFSET_X + PARAMS::LABEL_SIZE_X + PARAMS::DIV_TEXT_SIZE_X,\
+			PARAMS::WINDOW_SIZE_Y - ( PARAMS::OFFSET_Y + PARAMS::LABEL_SIZE_Y + PARAMS::DIV_TEXT_SIZE_Y ));
+}
+
+AxesLength Plotter::getAxesLength() const {
+	return AxesLength(PARAMS::WINDOW_SIZE_X - 2*(PARAMS::OFFSET_X + PARAMS::LABEL_SIZE_X + PARAMS::DIV_TEXT_SIZE_X),\
+			 PARAMS::WINDOW_SIZE_Y - 2*( PARAMS::OFFSET_Y + PARAMS::LABEL_SIZE_Y + PARAMS::DIV_TEXT_SIZE_Y));
 }
 
 std::vector<sf::RectangleShape> Plotter::createAxes(){
 	std::vector<sf::RectangleShape> v;
 
-	unsigned totalXOffset = PARAMS::OFFSET_X + PARAMS::LABEL_SIZE_X + PARAMS::DIV_TEXT_SIZE_X;
-	unsigned totalYOffset = PARAMS::OFFSET_Y + PARAMS::LABEL_SIZE_Y + PARAMS::DIV_TEXT_SIZE_Y;
-	unsigned axesLengthX = PARAMS::WINDOW_SIZE_X - totalXOffset*2;
-	unsigned axesLengthY = PARAMS::WINDOW_SIZE_Y - totalYOffset*2;
-
 	/* for x axis */
 	v.push_back(sf::RectangleShape());
-	v.back().setPosition( sf::Vector2f( totalXOffset, PARAMS::WINDOW_SIZE_Y - totalYOffset));
+	v.back().setPosition( sf::Vector2f( getOrigin().x, getOrigin().y));
 
 	if ( _axesThickness > 1)
 		v.back().setOrigin( 0, float(_axesThickness/2) );
-	v.back().setSize(sf::Vector2f(axesLengthX, _axesThickness));
+	v.back().setSize(sf::Vector2f( getAxesLength().x , _axesThickness));
 
 	/* for y axis */
 	v.push_back(sf::RectangleShape());
-	v.back().setPosition( sf::Vector2f( totalXOffset, PARAMS::WINDOW_SIZE_Y - totalYOffset));
+	v.back().setPosition( sf::Vector2f( getOrigin().x, getOrigin().y ));
 
 	if ( _axesThickness > 1)
 		v.back().setOrigin( 0, float(_axesThickness/2) );
-	v.back().setSize(sf::Vector2f(axesLengthY, _axesThickness));
+	v.back().setSize(sf::Vector2f( getAxesLength().y , _axesThickness));
 	v.back().setRotation(-90.0);
 
 	return v;
+}
+
+std::vector<sf::RectangleShape> Plotter::createDivisions(const std::string &param){
+	calculateScaleFactor( param );
+	std::vector<sf::RectangleShape> v;
+	/* x divisions */
+	for(unsigned i = 0; i*_xScaleFactor < getAxesLength().x; ++i){
+		if (i%10 == 0){
+			v.push_back(sf::RectangleShape());
+			v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_X,1));
+			v.back().setPosition(getOrigin().x + i*_xScaleFactor, getOrigin().y);
+			v.back().setRotation(90.0);
+		}
+	};
+	/* y divisions */
+	for(unsigned i = 0; i*_yScaleFactor < getAxesLength().y; ++i){
+		if (i%10 == 0){
+			v.push_back(sf::RectangleShape());
+			v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_Y,1));
+			v.back().setPosition(getOrigin().x, getOrigin().y - i*_yScaleFactor);
+			v.back().setRotation(180.0);
+		}
+	};
+	return v;
+}
+
+void Plotter::calculateScaleFactor( const std::string &param){
+	if (param.compare("ohlc") == 0){ // calculate scalefactor for candlesticks case
+		std::cout << "Hello";
+		_xScaleFactor = getAxesLength().x / _xData.size();
+		_yScaleFactor = getAxesLength().y / _yData.size();
+		
+	}
 }
 
 std::vector<sf::Text> Plotter::createLabels(){
@@ -102,7 +197,7 @@ sf::Text Plotter::createTitle(){
 	return t;
 }
 void Plotter::display(const std::vector<sf::RectangleShape> &axes, const std::vector<sf::Text> &labels,\
-		const sf::Text &title){
+		const sf::Text &title, const std::vector<sf::RectangleShape> &div, const std::vector<Candlestick> &cs){
 	_window.setPosition(
 			sf::Vector2i(
 				int( sf::VideoMode::getDesktopMode().width/2 - PARAMS::WINDOW_SIZE_X/2 ), 
@@ -120,6 +215,12 @@ void Plotter::display(const std::vector<sf::RectangleShape> &axes, const std::ve
 		_window.clear();
 		_window.draw(axes[0]);
 		_window.draw(axes[1]);
+		for(unsigned i = 0; i < div.size(); ++i)
+			_window.draw(div[i]);
+		for(unsigned i = 0; i < cs.size(); ++i){
+			_window.draw(cs[i].getWick());
+			_window.draw(cs[i].getBody());
+		}
 		_window.draw(labels[0]);
 		_window.draw(labels[1]);
 		_window.draw(title);
