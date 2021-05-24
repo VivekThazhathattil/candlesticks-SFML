@@ -3,11 +3,11 @@
 #include <string>
 #include "params.h"
 #include <cmath>
+#include <vector>
 
 class Candlestick{
 	public:
-		Candlestick(const double &o, const double &h, const double &l,\
-				const double &c, sf::Font &font, const Pos &pos,\
+		Candlestick(const std::string &x, const std::vector<double> &y, sf::Font &font, const Pos &pos,\
 				const Pos &origin, const double &pixelScaleMultiplier, const Pos &textPos);
 		~Candlestick();
 
@@ -20,6 +20,7 @@ class Candlestick{
 		double _high;
 		double _low;
 		double _close;
+		std::string _x;
 
 		sf::Text _det;
 		sf::RectangleShape _body;

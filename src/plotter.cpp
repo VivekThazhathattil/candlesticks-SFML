@@ -1,8 +1,12 @@
 #include "../include/plotter.h"
-// TODO: show OHLC text when mouse arrow is inside each candle
+// TODO [DONE] : show x axis div labels
+// TODO: get SR levels
+// TODO: get  MACD
+// TODO [DONE] : add keyboard shortcuts help, MACD view, SR view
+// TODO: fetch data from yahoo finance directly given quote
 
 Plotter::Plotter() : _window(sf::RenderWindow(sf::VideoMode(PARAMS::WINDOW_SIZE_X,\
-				PARAMS::WINDOW_SIZE_Y), "plot", sf::Style::Close)) {
+				PARAMS::WINDOW_SIZE_Y), "Candlestick Plot", sf::Style::Close)) {
 	/* default values */
 	_xLabel = "";
 	_yLabel = "";
@@ -15,6 +19,9 @@ Plotter::Plotter() : _window(sf::RenderWindow(sf::VideoMode(PARAMS::WINDOW_SIZE_
 	_ymax = -1;
 	_ymin = -1;
 	_pixelScaleMultiplier = -1;
+
+	showSRLevels = false;
+	showMACD = false;
 
 	if(!_font.loadFromFile("../res/arial.ttf")){
 		std::cerr << "Error loading font! Exiting...\n";
@@ -73,13 +80,29 @@ void Plotter::genPlot(const std::string param){
 
 std::vector<sf::Text> Plotter::getYDivisionLabels() const{
 	std::vector<sf::Text> v;
-	for(unsigned i = 0; i < PARAMS::NUM_DIVS_Y+1; ++i){ v.push_back(sf::Text());
+	/* y div labels */
+	for(unsigned i = 0; i < PARAMS::NUM_DIVS_Y+1; ++i){ 
+		v.push_back(sf::Text());
 		v.back().setFont(_font);
 		v.back().setString(std::to_string(int(_ymin + i*(_ymax - _ymin)/PARAMS::NUM_DIVS_Y)));
 		v.back().setFillColor(sf::Color(124,128,133));
-		v.back().setCharacterSize(PARAMS::DIV_TEXT_SIZE_X);
+		v.back().setCharacterSize(PARAMS::DIV_TEXT_SIZE_Y);
 		v.back().setOrigin(sf::Vector2f(0, v.back().getLocalBounds().height + PARAMS::OFFSET_Y/2));
 		v.back().setPosition(sf::Vector2f(getOrigin().x + PARAMS::OFFSET_X/2 , getOrigin().y - i*_yScaleFactor));
+	}
+	/* x div labels */
+	for (unsigned i = 0; i < PARAMS::NUM_DIVS_X + 1; ++i){
+		v.push_back(sf::Text());
+		v.back().setFont(_font);
+		float step = float(_xData.size())/PARAMS::NUM_DIVS_X;
+		std::string labelString = _xData[ (int(i * step) >= _xData.size()) ? _xData.size()-1 : int(i*step)];
+		std::cout << i*step << ")" << labelString << std::endl;
+		v.back().setString(labelString);
+		v.back().setFillColor(sf::Color(124,128,133));
+		v.back().setCharacterSize(PARAMS::DIV_TEXT_SIZE_X);
+		v.back().setOrigin(sf::Vector2f(v.back().getLocalBounds().width , v.back().getLocalBounds().height));
+		v.back().setPosition(sf::Vector2f(getOrigin().x + i*_xScaleFactor, getOrigin().y+ PARAMS::OFFSET_Y/2));
+		v.back().setRotation(-30.0);
 	}
 	return v;
 }
@@ -138,8 +161,11 @@ std::vector<Candlestick> Plotter::getCandlesticks(){
 	std::vector<Candlestick> v;
 	for( unsigned i = 0; i < _xData.size(); ++i){
 		double yPixelLoc = getOrigin().y -  _pixelScaleMultiplier * (_yData[i][1] - _ymin); // data high passed bc bounding box origin is at top-left.
-		v.push_back(Candlestick(_yData[i][0], _yData[i][1], _yData[i][2],\
-					_yData[i][3], _font, Pos(getOrigin().x + i*getAxesLength().x/_xData.size() , yPixelLoc), getOrigin(), _pixelScaleMultiplier, Pos(getOrigin().x + getAxesLength().x, getOrigin().y)));
+		v.push_back(Candlestick(_xData[i], _yData[i], _font,\
+					Pos(getOrigin().x + i*getAxesLength().x/_xData.size() ,yPixelLoc),\
+					getOrigin(), _pixelScaleMultiplier,\
+					Pos(getOrigin().x + getAxesLength().x, getOrigin().y))
+				);
 	}
 	return v;
 }	
@@ -199,7 +225,6 @@ std::vector<sf::RectangleShape> Plotter::createDivisions(const std::string &para
 
 void Plotter::calculateScaleFactor( const std::string &param){
 	if (param.compare("ohlc") == 0){ // calculate scalefactor for candlesticks case
-		std::cout << "Hello";
 		_xScaleFactor = getAxesLength().x / PARAMS::NUM_DIVS_X; // fix the number of divisions on each axes to 10
 		_yScaleFactor = getAxesLength().y / PARAMS::NUM_DIVS_Y;
 		
@@ -244,9 +269,18 @@ void Plotter::display(const std::vector<sf::RectangleShape> gridLines, const std
 	while(_window.isOpen()){
 		sf::Event e;
 		while(_window.pollEvent(e))
-		{
+	{
 			if (e.type == sf::Event::Closed)
 				_window.close();
+			if (e.type == sf::Event::KeyPressed)
+				if(e.key.code == sf::Keyboard::S){
+					/* show SR levels */
+					showSRLevels = !showSRLevels;
+				}
+				else if (e.key.code == sf::Keyboard::M){
+					/* show MACD */
+					showMACD = !showMACD;
+				}
 		}
 		_window.clear(sf::Color(12,14,16));
 		for(unsigned i = 0; i < gridLines.size(); ++i){
@@ -259,12 +293,29 @@ void Plotter::display(const std::vector<sf::RectangleShape> gridLines, const std
 		for(unsigned i = 0; i < cs.size(); ++i){
 			_window.draw(cs[i].getWick());
 			_window.draw(cs[i].getBody());
-			if(cs[i].mouseInCandleStick(Pos(sf::Mouse::getPosition(_window).x,sf::Mouse::getPosition(_window).y)))
-				_window.draw(cs[i].getText());
 		}
+		for(unsigned i = 0; i < cs.size(); ++i){
+			if(cs[i].mouseInCandleStick(Pos(sf::Mouse::getPosition(_window).x,sf::Mouse::getPosition(_window).y))){
+				_window.draw(cs[i].getText());
+				break;
+			}
+		}
+
 
 		for(unsigned i = 0; i < yDivText.size(); ++i){
 			_window.draw(yDivText[i]);
+		}
+		if(showSR){	
+			/* show support and resistance levels */
+			SRLevels sr(_pixelScaleMultiplier, _yData, getOrigin(), _ymin);
+			std::vector<sf::Lines> v = getSRLevelLines();
+			for(unsigned i = 0; i < v.size(); ++i){
+				_window.draw(v[i]);
+			}
+		}
+		if(showMACD){
+			/* complete this */
+
 		}
 		_window.draw(labels[0]);
 		_window.draw(labels[1]);

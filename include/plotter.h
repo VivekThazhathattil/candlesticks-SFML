@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cassert>
+#include <ctime>
 #include "params.h"
 #include "position.h"
 #include "dataHandler.h"
@@ -37,6 +38,9 @@ class Plotter{
 		double _ymax;
 		Pos _origin;
 		double _pixelScaleMultiplier;
+		
+		bool showSRLevels;
+		bool showMACD;
 
 		sf::RenderWindow _window;
 		sf::Font _font;

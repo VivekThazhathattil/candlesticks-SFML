@@ -1,12 +1,12 @@
 #include "../include/candlestick.h"
 
-Candlestick::Candlestick(const double &o, const double &h, const double &l,\
-	const double &c, sf::Font &font, const Pos &pos, const Pos &origin, const double &pixelScaleMultiplier,\
-	const Pos &textPos){
-	_open = o;
-	_high = h;
-	_low = l;
-	_close = c;
+Candlestick::Candlestick(const std::string &x, const std::vector<double> &y, sf::Font &font, const Pos &pos,\
+		const Pos &origin, const double &pixelScaleMultiplier, const Pos &textPos){
+	_open = y[0];
+	_high = y[1];
+	_low = y[2];
+	_close = y[3];
+	_x = x;
 	_det.setFont(font);
 
 	createBody(pos, origin, pixelScaleMultiplier);
@@ -37,7 +37,9 @@ void Candlestick::createWick(const Pos &pos, const Pos &origin, const double &pi
 }
 void Candlestick::createText(const Pos &pos){
 	_det.setCharacterSize(PARAMS::LABEL_SIZE_X);
-	_det.setString("O: " + std::to_string(int(_open)) +\
+	_det.setStyle(sf::Text::Bold);
+	_det.setString(_x + "\n" +\
+			"O: " + std::to_string(int(_open)) +\
 			"\nH: " + std::to_string(int(_high)) +\
 			"\nL: " + std::to_string(int(_low)) +\
 			"\nC: " + std::to_string(int(_close)));
