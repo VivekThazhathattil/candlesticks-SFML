@@ -47,7 +47,7 @@ private:
   sf::RenderWindow _window;
   sf::Font _font;
 
-	void changeColors(Candlestick &cs);
+	void changeColors(Candlestick &cs, const Color bull, const Color bear);
   double getMaximumYData() const;
   double getMinimumYData() const;
   void gatherAdditionalInfo(const std::string &param);

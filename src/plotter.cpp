@@ -1,4 +1,5 @@
 #include "../include/plotter.h"
+#include <time.h>
 // TODO [DONE] : show x axis div labels
 // TODO: get SR levels
 // TODO: get  MACD
@@ -30,6 +31,8 @@ Plotter::Plotter()
     std::cerr << "Error loading font! Exiting...\n";
     exit(1);
   }
+
+	srand(time(0));
 }
 
 Plotter::~Plotter() {}
@@ -275,10 +278,8 @@ sf::Text Plotter::createTitle() {
   return t;
 }
 
-void Plotter::changeColors(Candlestick &cs){
-	const Color bullCol(100,20,30);
-	const Color bearCol(200,100,20); 
-	cs.changeColor(bullCol, bearCol);	
+void Plotter::changeColors(Candlestick &cs, const Color bull, const Color bear){
+	cs.changeColor(bull, bear);
 }
 void Plotter::display(const std::vector<sf::RectangleShape> gridLines,
                       const std::vector<sf::RectangleShape> &axes,
@@ -319,14 +320,22 @@ void Plotter::display(const std::vector<sf::RectangleShape> gridLines,
     _window.draw(axes[1]);
     for (unsigned i = 0; i < div.size(); ++i)
       _window.draw(div[i]);
+
+//-----------------------------------------
+		// TODO: handle the change color in a separate function
+			const Color bull = bullColors[rand() % bullColors.size()];
+		 	const Color bear = bearColors[rand() % bearColors.size()];
+
     for (unsigned i = 0; i < cs.size(); ++i) {
-			if(changeColor)
-				changeColors(cs[i]);
+			if(changeColor){
+				changeColors(cs[i], bull, bear);
+			}
       _window.draw(cs[i].getWick());
       _window.draw(cs[i].getBody());
     }
 		if(changeColor)
 			changeColor = !changeColor;
+//-----------------------------------------
     for (unsigned i = 0; i < cs.size(); ++i) {
       if (cs[i].mouseInCandleStick(Pos(sf::Mouse::getPosition(_window).x,
                                        sf::Mouse::getPosition(_window).y))) {
