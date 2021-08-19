@@ -9,7 +9,7 @@ public:
            const Position &origin, const double &minDat);
   ~SRLevels();
 
-  std::vector<double> getSRLevels const() { return _levels; }
+  std::vector<Pos> getSRLevels() const { return _levels; }
   std::vector<sf::RectangleShape> getSRLevelLines() const {
     return _levelLines;
   }

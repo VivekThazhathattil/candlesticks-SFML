@@ -24,6 +24,7 @@ Plotter::Plotter()
 
   showSRLevels = false;
   showMACD = false;
+	changeColor = false;
 
   if (!_font.loadFromFile("../res/arial.ttf")) {
     std::cerr << "Error loading font! Exiting...\n";
@@ -273,13 +274,19 @@ sf::Text Plotter::createTitle() {
                    PARAMS::OFFSET_Y));
   return t;
 }
+
+void Plotter::changeColors(Candlestick &cs){
+	const Color bullCol(100,20,30);
+	const Color bearCol(200,100,20); 
+	cs.changeColor(bullCol, bearCol);	
+}
 void Plotter::display(const std::vector<sf::RectangleShape> gridLines,
                       const std::vector<sf::RectangleShape> &axes,
                       const std::vector<sf::Text> yDivText,
                       const std::vector<sf::Text> &labels,
                       const sf::Text &title,
                       const std::vector<sf::RectangleShape> &div,
-                      const std::vector<Candlestick> &cs) {
+                      std::vector<Candlestick> &cs) {
   _window.setPosition(
       sf::Vector2i(int(sf::VideoMode::getDesktopMode().width / 2 -
                        PARAMS::WINDOW_SIZE_X / 2),
@@ -292,14 +299,17 @@ void Plotter::display(const std::vector<sf::RectangleShape> gridLines,
     while (_window.pollEvent(e)) {
       if (e.type == sf::Event::Closed)
         _window.close();
-      if (e.type == sf::Event::KeyPressed)
+      if (e.type == sf::Event::KeyPressed){
         if (e.key.code == sf::Keyboard::S) {
           /* show SR levels */
           showSRLevels = !showSRLevels;
         } else if (e.key.code == sf::Keyboard::M) {
           /* show MACD */
           showMACD = !showMACD;
-        }
+        } else if (e.key.code == sf::Keyboard::C){
+					changeColor = !changeColor;
+				}
+			}
     }
     _window.clear(sf::Color(12, 14, 16));
     for (unsigned i = 0; i < gridLines.size(); ++i) {
@@ -310,9 +320,13 @@ void Plotter::display(const std::vector<sf::RectangleShape> gridLines,
     for (unsigned i = 0; i < div.size(); ++i)
       _window.draw(div[i]);
     for (unsigned i = 0; i < cs.size(); ++i) {
+			if(changeColor)
+				changeColors(cs[i]);
       _window.draw(cs[i].getWick());
       _window.draw(cs[i].getBody());
     }
+		if(changeColor)
+			changeColor = !changeColor;
     for (unsigned i = 0; i < cs.size(); ++i) {
       if (cs[i].mouseInCandleStick(Pos(sf::Mouse::getPosition(_window).x,
                                        sf::Mouse::getPosition(_window).y))) {
@@ -324,14 +338,14 @@ void Plotter::display(const std::vector<sf::RectangleShape> gridLines,
     for (unsigned i = 0; i < yDivText.size(); ++i) {
       _window.draw(yDivText[i]);
     }
-    if (showSR) {
-      /* show support and resistance levels */
-      SRLevels sr(_pixelScaleMultiplier, _yData, getOrigin(), _ymin);
-      std::vector<sf::Lines> v = getSRLevelLines();
-      for (unsigned i = 0; i < v.size(); ++i) {
-        _window.draw(v[i]);
-      }
-    }
+//    if (showSR) {
+//      /* show support and resistance levels */
+//      SRLevels sr(_pixelScaleMultiplier, _yData, getOrigin(), _ymin);
+//      std::vector<sf::Lines> v = getSRLevelLines();
+//      for (unsigned i = 0; i < v.size(); ++i) {
+//        _window.draw(v[i]);
+//      }
+//    }
     if (showMACD) {
       /* complete this */
     }

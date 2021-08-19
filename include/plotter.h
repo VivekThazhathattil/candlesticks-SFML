@@ -2,6 +2,7 @@
 #include "dataHandler.h"
 #include "params.h"
 #include "position.h"
+#include "colors.h"
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <cassert>
@@ -41,10 +42,12 @@ private:
 
   bool showSRLevels;
   bool showMACD;
+	bool changeColor;
 
   sf::RenderWindow _window;
   sf::Font _font;
 
+	void changeColors(Candlestick &cs);
   double getMaximumYData() const;
   double getMinimumYData() const;
   void gatherAdditionalInfo(const std::string &param);
@@ -64,5 +67,5 @@ private:
                const std::vector<sf::Text> yDivText,
                const std::vector<sf::Text> &labels, const sf::Text &title,
                const std::vector<sf::RectangleShape> &div,
-               const std::vector<Candlestick> &cs);
+               std::vector<Candlestick> &cs);
 };

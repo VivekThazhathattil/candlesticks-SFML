@@ -19,12 +19,12 @@ Candlestick::~Candlestick() {}
 
 void Candlestick::createBody(const Pos &pos, const Pos &origin,
                              const double &pixelScaleMultiplier) {
-  double bodyHeight = fmax(pixelScaleMultiplier * abs(_open - _close), 1);
+  _bodyHeight = fmax(pixelScaleMultiplier * abs(_open - _close), 1);
   double openPos = fmin(pixelScaleMultiplier * abs(_high - _open),
                         pixelScaleMultiplier * abs(_high - _close));
   _body.setPosition(pos.x, pos.y + openPos);
-  _body.setSize(sf::Vector2f(PARAMS::CANDLESTICK_BODY_WIDTH, bodyHeight));
-  if (bodyHeight == 1)
+  _body.setSize(sf::Vector2f(PARAMS::CANDLESTICK_BODY_WIDTH, _bodyHeight));
+  if (_bodyHeight == 1)
     _body.setFillColor(sf::Color(120, 120, 121));
   else {
     if (_open < _close)
@@ -56,4 +56,15 @@ void Candlestick::createText(const Pos &pos) {
 bool Candlestick::mouseInCandleStick(const Pos &pos) const {
   return (_wick.getGlobalBounds().contains(sf::Vector2f(pos.x, pos.y)) ||
           _body.getGlobalBounds().contains(sf::Vector2f(pos.x, pos.y)));
+}
+
+void Candlestick::changeColor(const Color bullColor, const Color bearColor){
+  if (_bodyHeight == 1)
+    _body.setFillColor(sf::Color(120, 120, 121));
+  else {
+    if (_open < _close)
+      _body.setFillColor(sf::Color(bullColor.R, bullColor.G, bullColor.B));
+    else
+      _body.setFillColor(sf::Color(bearColor.R, bearColor.G, bearColor.B));
+  }
 }
