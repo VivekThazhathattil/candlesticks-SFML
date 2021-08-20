@@ -25,10 +25,8 @@ void Candlestick::createBody(const Pos &pos, const Pos &origin,
   _body.setPosition(pos.x, pos.y + openPos);
   _body.setSize(sf::Vector2f(PARAMS::CANDLESTICK_BODY_WIDTH, _bodyHeight));
   if (_bodyHeight == 1)
-  	_body.setFillColor(sf::Color(\
-					DarkBG::wickColor.R,\
-				 	DarkBG::wickColor.G,\
-				 	DarkBG::wickColor.B));
+    _body.setFillColor(sf::Color(DarkBG::wickColor.R, DarkBG::wickColor.G,
+                                 DarkBG::wickColor.B));
   else {
     if (_open < _close)
       _body.setFillColor(sf::Color::Green);
@@ -43,10 +41,8 @@ void Candlestick::createWick(const Pos &pos, const Pos &origin,
                     pos.y);
   double wickHeight = fmax(pixelScaleMultiplier * abs(_high - _low), 1);
   _wick.setSize(sf::Vector2f(PARAMS::CANDLESTICK_WICK_WIDTH, wickHeight));
-  _wick.setFillColor(sf::Color(\
-				DarkBG::wickColor.R,\
-			 	DarkBG::wickColor.G,\
-			 	DarkBG::wickColor.B));
+  _wick.setFillColor(
+      sf::Color(DarkBG::wickColor.R, DarkBG::wickColor.G, DarkBG::wickColor.B));
 }
 void Candlestick::createText(const Pos &pos) {
   _det.setCharacterSize(PARAMS::LABEL_SIZE_X);
@@ -58,22 +54,24 @@ void Candlestick::createText(const Pos &pos) {
   _det.setPosition(
       sf::Vector2f(pos.x - _det.getLocalBounds().width - PARAMS::OFFSET_X,
                    pos.y - _det.getLocalBounds().height - PARAMS::OFFSET_Y));
+	_det.setFillColor(sf::Color(DarkBG::textColor.R, DarkBG::textColor.G, DarkBG::textColor.B));
 }
 bool Candlestick::mouseInCandleStick(const Pos &pos) const {
   return (_wick.getGlobalBounds().contains(sf::Vector2f(pos.x, pos.y)) ||
           _body.getGlobalBounds().contains(sf::Vector2f(pos.x, pos.y)));
 }
 
-void Candlestick::changeColor(const Color bullColor, const Color bearColor){
+void Candlestick::changeColor(const Color bullColor, const Color bearColor) {
   if (_bodyHeight == 1)
-  	_body.setFillColor(sf::Color(\
-					DarkBG::wickColor.R,\
-				 	DarkBG::wickColor.G,\
-				 	DarkBG::wickColor.B));
+    _body.setFillColor(sf::Color(DarkBG::wickColor.R, DarkBG::wickColor.G,
+                                 DarkBG::wickColor.B));
   else {
     if (_open < _close)
       _body.setFillColor(sf::Color(bullColor.R, bullColor.G, bullColor.B));
     else
       _body.setFillColor(sf::Color(bearColor.R, bearColor.G, bearColor.B));
   }
+}
+void Candlestick::changeDetColor(const Color color){
+	_det.setFillColor(sf::Color(color.R, color.G, color.B));
 }

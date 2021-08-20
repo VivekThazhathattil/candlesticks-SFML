@@ -1,5 +1,5 @@
-#include "params.h"
 #include "colors.h"
+#include "params.h"
 #include "position.h"
 #include <SFML/Graphics.hpp>
 #include <cmath>
@@ -17,14 +17,15 @@ public:
   sf::RectangleShape getWick() const { return _wick; }
   sf::Text getText() const { return _det; }
   bool mouseInCandleStick(const Pos &pos) const;
-	void changeColor(const Color bullColor, const Color bearColor);
+  void changeColor(const Color bullColor, const Color bearColor);
+	void changeDetColor(const Color color);
 
 private:
   double _open;
   double _high;
   double _low;
   double _close;
-	double _bodyHeight;
+  double _bodyHeight;
   std::string _x;
 
   sf::Text _det;

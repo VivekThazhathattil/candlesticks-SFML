@@ -41,7 +41,8 @@ void DataHandler::fetch(const std::string filePath,
           val = std::stod(v[i]);
         } catch (std::exception &e) {
           yData[lineCount].pop_back();
-          std::cerr << "DataHandler: Invalid argument in std::stod encountered. Omitting..."
+          std::cerr << "DataHandler: Invalid argument in std::stod "
+                       "encountered. Omitting..."
                     << std::endl;
           isDouble = false;
           break;
@@ -71,9 +72,10 @@ void DataHandler::fetch(const std::string filePath,
   }
   //	else{
   //		for(unsigned i = 0; i < yData.size(); ++i){
-  //			std::cout << i+1 << ")\t" << "size: " << yData[i].size() <<
-  //"\t"; 			for(unsigned j = 0; j < yData[i].size(); ++j){ 				std::cout <<
-  //yData[i][j] << " ";
+  //			std::cout << i+1 << ")\t" << "size: " << yData[i].size()
+  //<<
+  //"\t"; 			for(unsigned j = 0; j < yData[i].size(); ++j){
+  //std::cout << yData[i][j] << " ";
   //			}
   //			std::cout << std::endl;
   //		}

@@ -1,8 +1,8 @@
 #include "candlestick.h"
+#include "colors.h"
 #include "dataHandler.h"
 #include "params.h"
 #include "position.h"
-#include "colors.h"
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <cassert>
@@ -40,27 +40,26 @@ private:
   Pos _origin;
   double _pixelScaleMultiplier;
 
-	Color _wickColor;
-	Color _bgColor;
-	Color _textColor;
-	Color _titleColor;
-	Color _axesColor;
-	Color _gridColor;
+  Color _wickColor;
+  Color _bgColor;
+  Color _textColor;
+  Color _axesColor;
+  Color _gridColor;
 
   bool showSRLevels;
   bool showMACD;
-	bool changeColor;
+  bool changeColor;
 
   sf::RenderWindow _window;
   sf::Font _font;
 
-	void changeColors(Candlestick &cs, const Color bull, const Color bear);
-	void lightModeSwitch(std::vector<sf::RectangleShape> &gridLines,
-                      std::vector<sf::RectangleShape> &axes,
-                      std::vector<sf::Text> &yDivText,
-                      std::vector<sf::Text> &labels,
-                      sf::Text &title,
-                      std::vector<sf::RectangleShape> &div);
+  void changeColors(Candlestick &cs, const Color bull, const Color bear);
+  void lightModeSwitch(std::vector<sf::RectangleShape> &gridLines,
+                       std::vector<sf::RectangleShape> &axes,
+                       std::vector<sf::Text> &yDivText,
+                       std::vector<sf::Text> &labels, sf::Text &title,
+                       std::vector<sf::RectangleShape> &div,
+											 std::vector<Candlestick> &cs);
   double getMaximumYData() const;
   double getMinimumYData() const;
   void gatherAdditionalInfo(const std::string &param);
@@ -77,8 +76,7 @@ private:
   double getPixelSizeMultiplier();
   void display(std::vector<sf::RectangleShape> &gridLines,
                std::vector<sf::RectangleShape> &axes,
-               std::vector<sf::Text> &yDivText,
-               std::vector<sf::Text> &labels, sf::Text &title,
-               std::vector<sf::RectangleShape> &div,
+               std::vector<sf::Text> &yDivText, std::vector<sf::Text> &labels,
+               sf::Text &title, std::vector<sf::RectangleShape> &div,
                std::vector<Candlestick> &cs);
 };

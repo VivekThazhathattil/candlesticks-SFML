@@ -1,6 +1,5 @@
 #include "../include/plotter.h"
 #include <time.h>
-// TODO [DONE] : show x axis div labels
 // TODO: get SR levels
 // TODO: get  MACD
 // TODO [DONE] : add keyboard shortcuts help, MACD view, SR view
@@ -23,23 +22,22 @@ Plotter::Plotter()
   _ymin = -1;
   _pixelScaleMultiplier = -1;
 
-	_wickColor 	= DarkBG::wickColor;
-	_bgColor 		= DarkBG::bgColor;
-	_textColor 	= DarkBG::textColor;
-	_titleColor = DarkBG::titleColor;
-	_axesColor 	= DarkBG::axesColor;
-	_gridColor 	= DarkBG::gridColor;
-	
+  _wickColor = DarkBG::wickColor;
+  _bgColor = DarkBG::bgColor;
+  _textColor = DarkBG::textColor;
+  _axesColor = DarkBG::axesColor;
+  _gridColor = DarkBG::gridColor;
+
   showSRLevels = false;
   showMACD = false;
-	changeColor = false;
+  changeColor = false;
 
   if (!_font.loadFromFile("../res/arial.ttf")) {
     std::cerr << "Error loading font! Exiting...\n";
     exit(1);
   }
 
-	srand(time(0));
+  srand(time(0));
 }
 
 Plotter::~Plotter() {}
@@ -262,6 +260,7 @@ std::vector<sf::Text> Plotter::createLabels() {
   v.back().setPosition(sf::Vector2f(getOrigin().x + getAxesLength().x / 2 -
                                         v.back().getLocalBounds().width / 2,
                                     getOrigin().y + PARAMS::OFFSET_Y));
+	v.back().setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
   //	v.back().setOrigin( v.back().getGlobalBounds().width/2
   //,PARAMS::LABEL_SIZE_X/2);
 
@@ -272,6 +271,7 @@ std::vector<sf::Text> Plotter::createLabels() {
   v.back().setPosition(sf::Vector2f(
       getOrigin().x - v.back().getLocalBounds().height / 2 - PARAMS::OFFSET_Y,
       getOrigin().y - getAxesLength().y / 2));
+	v.back().setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
   //	v.back().setOrigin( v.back().getGlobalBounds().width/2
   //,PARAMS::LABEL_SIZE_Y/2);
   v.back().setRotation(-90.0);
@@ -284,52 +284,53 @@ sf::Text Plotter::createTitle() {
   t.setPosition(
       sf::Vector2f(PARAMS::WINDOW_SIZE_X / 2 - t.getLocalBounds().width / 2,
                    PARAMS::OFFSET_Y));
-	t.setFillColor(sf::Color(_titleColor.R, _titleColor.G, _titleColor.B));
+  t.setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
   return t;
 }
 
-void Plotter::changeColors(Candlestick &cs, const Color bull, const Color bear){
-	cs.changeColor(bull, bear);
+void Plotter::changeColors(Candlestick &cs, const Color bull,
+                           const Color bear) {
+  cs.changeColor(bull, bear);
 }
 void Plotter::lightModeSwitch(std::vector<sf::RectangleShape> &gridLines,
-                      std::vector<sf::RectangleShape> &axes,
-                      std::vector<sf::Text> &yDivText,
-                      std::vector<sf::Text> &labels,
-                      sf::Text &title,
-                      std::vector<sf::RectangleShape> &div){
-	// find out current mode
-	if( _bgColor.R == LightBG::bgColor.R &&\
-			_bgColor.G == LightBG::bgColor.G &&\
-			_bgColor.B == LightBG::bgColor.B\
-			){ // currently in light mode. Switch to dark mode.
-		_wickColor = DarkBG::wickColor;
-		_bgColor = DarkBG::bgColor;
-		_textColor = DarkBG::textColor;
-		_titleColor = DarkBG::titleColor;
-		_axesColor = DarkBG::axesColor;
-		_gridColor = DarkBG::gridColor;
-	}
-	else{ // currently in dark mode. Switch to light mode.
-		_wickColor = LightBG::wickColor;
-		_bgColor = LightBG::bgColor;
-		_textColor = LightBG::textColor;
-		_titleColor = LightBG::titleColor;
-		_axesColor = LightBG::axesColor;
-		_gridColor = LightBG::gridColor;
-	}
+                              std::vector<sf::RectangleShape> &axes,
+                              std::vector<sf::Text> &yDivText,
+                              std::vector<sf::Text> &labels, sf::Text &title,
+                              std::vector<sf::RectangleShape> &div,
+                      				std::vector<Candlestick> &cs) {
+  // find out current mode
+  if (_bgColor.R == LightBG::bgColor.R && _bgColor.G == LightBG::bgColor.G &&
+      _bgColor.B ==
+          LightBG::bgColor.B) { // currently in light mode. Switch to dark mode.
+    _wickColor = DarkBG::wickColor;
+    _bgColor = DarkBG::bgColor;
+    _textColor = DarkBG::textColor;
+    _axesColor = DarkBG::axesColor;
+    _gridColor = DarkBG::gridColor;
+  } else { // currently in dark mode. Switch to light mode.
+    _wickColor = LightBG::wickColor;
+    _bgColor = LightBG::bgColor;
+    _textColor = LightBG::textColor;
+    _axesColor = LightBG::axesColor;
+    _gridColor = LightBG::gridColor;
+  }
 
   for (unsigned i = 0; i < gridLines.size(); ++i)
-    gridLines[i].setFillColor(sf::Color(_gridColor.R, _gridColor.G, _gridColor.B));
+    gridLines[i].setFillColor(
+        sf::Color(_gridColor.R, _gridColor.G, _gridColor.B));
   for (unsigned i = 0; i < axes.size(); ++i)
     axes[i].setFillColor(sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
   for (unsigned i = 0; i < yDivText.size(); ++i)
-    yDivText[i].setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
+    yDivText[i].setFillColor(
+        sf::Color(_textColor.R, _textColor.G, _textColor.B));
+  for (unsigned i = 0; i < cs.size(); ++i)
+		cs[i].changeDetColor(_textColor);
+
 }
-void Plotter::display(std::vector<sf::RectangleShape>& gridLines,
+void Plotter::display(std::vector<sf::RectangleShape> &gridLines,
                       std::vector<sf::RectangleShape> &axes,
                       std::vector<sf::Text> &yDivText,
-                      std::vector<sf::Text> &labels,
-                      sf::Text &title,
+                      std::vector<sf::Text> &labels, sf::Text &title,
                       std::vector<sf::RectangleShape> &div,
                       std::vector<Candlestick> &cs) {
   _window.setPosition(
@@ -344,7 +345,7 @@ void Plotter::display(std::vector<sf::RectangleShape>& gridLines,
     while (_window.pollEvent(e)) {
       if (e.type == sf::Event::Closed)
         _window.close();
-      if (e.type == sf::Event::KeyPressed){
+      if (e.type == sf::Event::KeyPressed) {
         if (e.key.code == sf::Keyboard::S) {
           /* show SR levels */
           showSRLevels = !showSRLevels;
@@ -352,15 +353,13 @@ void Plotter::display(std::vector<sf::RectangleShape>& gridLines,
           /* show MACD */
           showMACD = !showMACD;
         } else if (e.key.code == sf::Keyboard::C)
-						changeColor = !changeColor;
-					else if (e.key.code == sf::Keyboard::B){
-						lightModeSwitch(gridLines, axes, yDivText, labels, title, div);
-					}
-			}
+          changeColor = !changeColor;
+        else if (e.key.code == sf::Keyboard::B) {
+          lightModeSwitch(gridLines, axes, yDivText, labels, title, div, cs);
+        }
+      }
     }
-    _window.clear(\
-				sf::Color(_bgColor.R, _bgColor.G, _bgColor.B)\
-				);
+    _window.clear(sf::Color(_bgColor.R, _bgColor.G, _bgColor.B));
     for (unsigned i = 0; i < gridLines.size(); ++i) {
       _window.draw(gridLines[i]);
     }
@@ -369,21 +368,21 @@ void Plotter::display(std::vector<sf::RectangleShape>& gridLines,
     for (unsigned i = 0; i < div.size(); ++i)
       _window.draw(div[i]);
 
-//-----------------------------------------
-		// TODO: handle the change color in a separate function
-			const Color bull = bullColors[rand() % bullColors.size()];
-		 	const Color bear = bearColors[rand() % bearColors.size()];
+    //-----------------------------------------
+    // TODO: handle the change color in a separate function
+    const Color bull = bullColors[rand() % bullColors.size()];
+    const Color bear = bearColors[rand() % bearColors.size()];
 
     for (unsigned i = 0; i < cs.size(); ++i) {
-			if(changeColor){
-				changeColors(cs[i], bull, bear);
-			}
+      if (changeColor) {
+        changeColors(cs[i], bull, bear);
+      }
       _window.draw(cs[i].getWick());
       _window.draw(cs[i].getBody());
     }
-		if(changeColor)
-			changeColor = !changeColor;
-//-----------------------------------------
+    if (changeColor)
+      changeColor = !changeColor;
+    //-----------------------------------------
     for (unsigned i = 0; i < cs.size(); ++i) {
       if (cs[i].mouseInCandleStick(Pos(sf::Mouse::getPosition(_window).x,
                                        sf::Mouse::getPosition(_window).y))) {
@@ -395,14 +394,14 @@ void Plotter::display(std::vector<sf::RectangleShape>& gridLines,
     for (unsigned i = 0; i < yDivText.size(); ++i) {
       _window.draw(yDivText[i]);
     }
-//    if (showSR) {
-//      /* show support and resistance levels */
-//      SRLevels sr(_pixelScaleMultiplier, _yData, getOrigin(), _ymin);
-//      std::vector<sf::Lines> v = getSRLevelLines();
-//      for (unsigned i = 0; i < v.size(); ++i) {
-//        _window.draw(v[i]);
-//      }
-//    }
+    //    if (showSR) {
+    //      /* show support and resistance levels */
+    //      SRLevels sr(_pixelScaleMultiplier, _yData, getOrigin(), _ymin);
+    //      std::vector<sf::Lines> v = getSRLevelLines();
+    //      for (unsigned i = 0; i < v.size(); ++i) {
+    //        _window.draw(v[i]);
+    //      }
+    //    }
     if (showMACD) {
       /* complete this */
     }
