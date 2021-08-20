@@ -11,7 +11,7 @@ void DataHandler::fetch(const std::string filePath,
 
   std::ifstream pFile(filePath);
   if (!pFile.is_open()) {
-    std::cerr << "Error opening the data file. Exiting...\n";
+    std::cerr << "DataHandler: Error opening the data file. Exiting...\n";
     exit(1);
   }
 
@@ -41,7 +41,7 @@ void DataHandler::fetch(const std::string filePath,
           val = std::stod(v[i]);
         } catch (std::exception &e) {
           yData[lineCount].pop_back();
-          std::cerr << "Invalid argument in std::stod encountered. Omitting..."
+          std::cerr << "DataHandler: Invalid argument in std::stod encountered. Omitting..."
                     << std::endl;
           isDouble = false;
           break;
@@ -66,7 +66,7 @@ void DataHandler::fetch(const std::string filePath,
   }
 
   if (yData.empty()) {
-    std::cerr << "dataHandler.cpp: yData empty fetch error. Exiting...\n";
+    std::cerr << "DataHandler: yData empty fetch error. Exiting...\n";
     exit(1);
   }
   //	else{

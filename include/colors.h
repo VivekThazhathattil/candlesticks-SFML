@@ -3,6 +3,7 @@
 struct ColorCode {
 	unsigned R, G, B; 
   ColorCode() : R(0), G(0), B(0) {}
+  ColorCode(unsigned val) : R(val), G(val), B(val) {}
   ColorCode(unsigned valR, unsigned valG, unsigned valB): R(valR), G(valG), B(valB) {}
 };
 
@@ -33,3 +34,21 @@ const std::vector<Color> bearColors =  {\
 	Color(255,69,0),\
 	Color(219,112,147)\
 };
+
+namespace LightBG{
+	const Color wickColor(120, 120, 121),\
+		bgColor(255),\
+		textColor(105),\
+		titleColor,\
+		axesColor,\
+		gridColor(173,216,230);
+}
+
+namespace DarkBG{
+	const Color wickColor(120, 120, 121),\
+		bgColor(12, 14, 16),\
+		textColor(124, 128, 133),\
+		titleColor(255),\
+		axesColor(255),\
+		gridColor(30, 33, 42);
+}

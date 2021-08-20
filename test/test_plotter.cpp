@@ -2,11 +2,11 @@
 
 int main(){
 	Plotter plot;
-	std::string filePath = "/mnt/sda_12/projects/algotrading/data/TATASTEEL.NS.csv";
+	std::string filePath = "/mnt/sda_12/projects/algotrading/data/GOOG.csv";
 	plot.fetchData(filePath);
 	plot.xLabel("");
 	plot.yLabel("");
-	plot.title("TATASTEEL.NS");
+	plot.title("GOOG");
 	plot.candleSticks();
 	return 0;
 }

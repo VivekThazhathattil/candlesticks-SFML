@@ -25,7 +25,10 @@ void Candlestick::createBody(const Pos &pos, const Pos &origin,
   _body.setPosition(pos.x, pos.y + openPos);
   _body.setSize(sf::Vector2f(PARAMS::CANDLESTICK_BODY_WIDTH, _bodyHeight));
   if (_bodyHeight == 1)
-    _body.setFillColor(sf::Color(120, 120, 121));
+  	_body.setFillColor(sf::Color(\
+					DarkBG::wickColor.R,\
+				 	DarkBG::wickColor.G,\
+				 	DarkBG::wickColor.B));
   else {
     if (_open < _close)
       _body.setFillColor(sf::Color::Green);
@@ -40,7 +43,10 @@ void Candlestick::createWick(const Pos &pos, const Pos &origin,
                     pos.y);
   double wickHeight = fmax(pixelScaleMultiplier * abs(_high - _low), 1);
   _wick.setSize(sf::Vector2f(PARAMS::CANDLESTICK_WICK_WIDTH, wickHeight));
-  _wick.setFillColor(sf::Color(120, 120, 121));
+  _wick.setFillColor(sf::Color(\
+				DarkBG::wickColor.R,\
+			 	DarkBG::wickColor.G,\
+			 	DarkBG::wickColor.B));
 }
 void Candlestick::createText(const Pos &pos) {
   _det.setCharacterSize(PARAMS::LABEL_SIZE_X);
@@ -60,7 +66,10 @@ bool Candlestick::mouseInCandleStick(const Pos &pos) const {
 
 void Candlestick::changeColor(const Color bullColor, const Color bearColor){
   if (_bodyHeight == 1)
-    _body.setFillColor(sf::Color(120, 120, 121));
+  	_body.setFillColor(sf::Color(\
+					DarkBG::wickColor.R,\
+				 	DarkBG::wickColor.G,\
+				 	DarkBG::wickColor.B));
   else {
     if (_open < _close)
       _body.setFillColor(sf::Color(bullColor.R, bullColor.G, bullColor.B));

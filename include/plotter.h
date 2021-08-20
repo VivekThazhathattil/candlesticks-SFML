@@ -40,6 +40,13 @@ private:
   Pos _origin;
   double _pixelScaleMultiplier;
 
+	Color _wickColor;
+	Color _bgColor;
+	Color _textColor;
+	Color _titleColor;
+	Color _axesColor;
+	Color _gridColor;
+
   bool showSRLevels;
   bool showMACD;
 	bool changeColor;
@@ -48,6 +55,12 @@ private:
   sf::Font _font;
 
 	void changeColors(Candlestick &cs, const Color bull, const Color bear);
+	void lightModeSwitch(std::vector<sf::RectangleShape> &gridLines,
+                      std::vector<sf::RectangleShape> &axes,
+                      std::vector<sf::Text> &yDivText,
+                      std::vector<sf::Text> &labels,
+                      sf::Text &title,
+                      std::vector<sf::RectangleShape> &div);
   double getMaximumYData() const;
   double getMinimumYData() const;
   void gatherAdditionalInfo(const std::string &param);
@@ -62,10 +75,10 @@ private:
   sf::Text createTitle();
   std::vector<Candlestick> getCandlesticks();
   double getPixelSizeMultiplier();
-  void display(const std::vector<sf::RectangleShape> gridLines,
-               const std::vector<sf::RectangleShape> &axes,
-               const std::vector<sf::Text> yDivText,
-               const std::vector<sf::Text> &labels, const sf::Text &title,
-               const std::vector<sf::RectangleShape> &div,
+  void display(std::vector<sf::RectangleShape> &gridLines,
+               std::vector<sf::RectangleShape> &axes,
+               std::vector<sf::Text> &yDivText,
+               std::vector<sf::Text> &labels, sf::Text &title,
+               std::vector<sf::RectangleShape> &div,
                std::vector<Candlestick> &cs);
 };
