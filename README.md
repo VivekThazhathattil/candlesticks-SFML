@@ -1,19 +1,26 @@
-#Barebones candlestick chart
+# Candlestick Chart for Stock Trading
 
-A C++ program for displaying historical stock data in a candlestick format. Dependency on SFML, a multimedia library.
+A C++ program for displaying historical stock data in a candlestick format. 
+
+Dependency on SFML, a multimedia library.
 
 <p float="left">
 <img src="img/prog1.png" width="400" height="400"/>
-</p>
-
-
-#### Random colors for candles (press c to randomize)
-<p float="left">
 <img src="img/prog2.png" width="400" height="400"/>
+<img src="img/prog3.png" width="400" height="400"/>
+<img src="img/prog4.png" width="400" height="400"/>
 </p>
+
+
+#### Keyboard shortcuts (press c to randomize)
+
+| Key | Description                    |
+|-----|--------------------------------|
+| c   | randomize candle body colors   |
+| b   | toggle between light/dark mode |
 
 ### Ideas left to implement (aka TODO):
-* ~~Custom kawaii colors~~ + white bg
+* ~~Custom kawaii colors + white bg~~
 * user input html color codes for backgrounds, bullish candles and bearish candles
 * ~~x-axis markings~~
 * zoomability  (scale time period)
