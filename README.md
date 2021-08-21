@@ -35,5 +35,5 @@ Dependency on SFML, a multimedia library.
 * convert to renko charts
 * identify x coordinate marking format and convert into other compact notations
 * specify the csv file as a terminal command
-* figure out the title of the graph from the file name. Override if custom name specified as command line argument.
+* ~~figure out the title of the graph from the file name. Override if custom name specified as command line argument.~~
 * save user preferences in a local file and load that at startup.

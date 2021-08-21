@@ -5,7 +5,9 @@ DataHandler::~DataHandler() {}
 
 void DataHandler::fetch(const std::string filePath,
                         std::vector<std::string> &xData,
-                        std::vector<std::vector<double>> &yData) {
+                        std::vector<std::vector<double>> &yData,
+												std::string &title) {
+	getTitleFromFilePath(title, filePath);
   xData.clear();
   yData.clear();
 
@@ -86,4 +88,9 @@ void DataHandler::fetch(const std::string filePath,
   //	}
 
   pFile.close();
+}
+
+void DataHandler::getTitleFromFilePath(std::string &title, const std::string &filePath){
+	const std::filesystem::path path = filePath;
+	title = path.stem();
 }

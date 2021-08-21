@@ -1,9 +1,5 @@
 #include "../include/plotter.h"
 #include <time.h>
-// TODO: get SR levels
-// TODO: get  MACD
-// TODO [DONE] : add keyboard shortcuts help, MACD view, SR view
-// TODO: fetch data from yahoo finance directly given quote
 
 Plotter::Plotter()
     : _window(sf::RenderWindow(
@@ -44,7 +40,7 @@ Plotter::~Plotter() {}
 
 void Plotter::fetchData(const std::string filePath) {
   DataHandler dh;
-  dh.fetch(filePath, _xData, _yData);
+  dh.fetch(filePath, _xData, _yData, _title);
 }
 
 void Plotter::xAxisRange(const unsigned x_min, const unsigned x_max) {}
@@ -55,7 +51,16 @@ void Plotter::xLabel(const std::string xTitle) { _xLabel = xTitle; }
 
 void Plotter::yLabel(const std::string yTitle) { _yLabel = yTitle; }
 
-void Plotter::title(const std::string uTitle) { _title = uTitle; }
+void Plotter::title(const std::string uTitle) { 
+	if(uTitle.empty() && _title.length() < 2){
+		_title = "CANDLESTICK CHART";
+		return;
+	}
+	else if (!uTitle.empty()){
+		_title = uTitle;
+		return;
+	}
+}
 
 void Plotter::candleSticks() { genPlot("ohlc"); }
 
