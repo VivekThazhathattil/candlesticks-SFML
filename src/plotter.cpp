@@ -33,6 +33,8 @@ Plotter::Plotter()
     exit(1);
   }
 
+	// get the values for _xBegIdx, _yBegIdx, _xEndIdx, _yEndIdx
+
   srand(time(0));
 }
 
@@ -51,7 +53,7 @@ void Plotter::xLabel(const std::string xTitle) { _xLabel = xTitle; }
 
 void Plotter::yLabel(const std::string yTitle) { _yLabel = yTitle; }
 
-void Plotter::title(const std::string uTitle) { 
+void Plotter::__title(const std::string uTitle) { 
 	if(uTitle.empty() && _title.length() < 2){
 		_title = "CANDLESTICK CHART";
 		return;
@@ -70,19 +72,31 @@ void Plotter::genPlot(const std::string param) {
     exit(1);
   }
 
-  std::vector<sf::RectangleShape> axes = createAxes();
-  std::vector<sf::RectangleShape> div = createDivisions(param);
-  std::vector<sf::Text> labels = createLabels();
-  sf::Text title = createTitle();
-  std::vector<sf::RectangleShape> gridLines = createGridLines();
+	this->axes = createAxes();
+	this->div = createDivisions(param);
+	this->labels = createLabels();
+	this->title = createTitle();
+	this->gridLines = createGridLines();
 
   if (param.compare("ohlc") == 0) {
     gatherAdditionalInfo(param);
-    std::vector<sf::Text> yDivText = getYDivisionLabels();
-    std::vector<Candlestick> candlesticks = getCandlesticks();
-    display(gridLines, axes, yDivText, labels, title, div, candlesticks);
+    this->yDivText = getYDivisionLabels();
+    this->cs = getCandlesticks();
+		updateMinIdxs();
+		display();
   }
 }
+
+void Plotter::updateMinIdxs(){
+	//_xBegIdx = (static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) > 0)\
+						 ? static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) \
+						 : 0;
+	// [dve] temp values
+	_xEndIdx = 0;
+	_yBegIdx = 0;
+	_yEndIdx = 0;
+}
+
 
 std::vector<sf::Text> Plotter::getYDivisionLabels() const {
   std::vector<sf::Text> v;
@@ -236,6 +250,7 @@ Plotter::createDivisions(const std::string &param) {
     v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_X, 1));
     v.back().setPosition(getOrigin().x + i * _xScaleFactor, getOrigin().y);
     v.back().setRotation(90.0);
+		v.back().setFillColor(sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
   };
   /* y divisions */
   for (unsigned i = 0; i * _yScaleFactor < getAxesLength().y; ++i) {
@@ -243,6 +258,7 @@ Plotter::createDivisions(const std::string &param) {
     v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_Y, 1));
     v.back().setPosition(getOrigin().x, getOrigin().y - i * _yScaleFactor);
     v.back().setRotation(180.0);
+		v.back().setFillColor(sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
   };
   return v;
 }
@@ -252,7 +268,7 @@ void Plotter::calculateScaleFactor(const std::string &param) {
       0) { // calculate scalefactor for candlesticks case
     _xScaleFactor =
         getAxesLength().x /
-        PARAMS::NUM_DIVS_X; // fix the number of divisions on each axes to 10
+        PARAMS::NUM_DIVS_X; // fix the number of divisions on each axes to PARAMS::NUM_DIV_X and PARAMS::NUM_DIVS_Y respectively
     _yScaleFactor = getAxesLength().y / PARAMS::NUM_DIVS_Y;
   }
 }
@@ -297,12 +313,7 @@ void Plotter::changeColors(Candlestick &cs, const Color bull,
                            const Color bear) {
   cs.changeColor(bull, bear);
 }
-void Plotter::lightModeSwitch(std::vector<sf::RectangleShape> &gridLines,
-                              std::vector<sf::RectangleShape> &axes,
-                              std::vector<sf::Text> &yDivText,
-                              std::vector<sf::Text> &labels, sf::Text &title,
-                              std::vector<sf::RectangleShape> &div,
-                      				std::vector<Candlestick> &cs) {
+void Plotter::lightModeSwitch(){
   // find out current mode
   if (_bgColor.R == LightBG::bgColor.R && _bgColor.G == LightBG::bgColor.G &&
       _bgColor.B ==
@@ -330,14 +341,12 @@ void Plotter::lightModeSwitch(std::vector<sf::RectangleShape> &gridLines,
         sf::Color(_textColor.R, _textColor.G, _textColor.B));
   for (unsigned i = 0; i < cs.size(); ++i)
 		cs[i].changeDetColor(_textColor);
+  for (unsigned i = 0; i < div.size(); ++i)
+    div[i].setFillColor(
+        sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
 
 }
-void Plotter::display(std::vector<sf::RectangleShape> &gridLines,
-                      std::vector<sf::RectangleShape> &axes,
-                      std::vector<sf::Text> &yDivText,
-                      std::vector<sf::Text> &labels, sf::Text &title,
-                      std::vector<sf::RectangleShape> &div,
-                      std::vector<Candlestick> &cs) {
+void Plotter::display(){
   _window.setPosition(
       sf::Vector2i(int(sf::VideoMode::getDesktopMode().width / 2 -
                        PARAMS::WINDOW_SIZE_X / 2),
@@ -359,9 +368,8 @@ void Plotter::display(std::vector<sf::RectangleShape> &gridLines,
           showMACD = !showMACD;
         } else if (e.key.code == sf::Keyboard::C)
           changeColor = !changeColor;
-        else if (e.key.code == sf::Keyboard::B) {
-          lightModeSwitch(gridLines, axes, yDivText, labels, title, div, cs);
-        }
+        else if (e.key.code == sf::Keyboard::B)
+          lightModeSwitch();
       }
     }
     _window.clear(sf::Color(_bgColor.R, _bgColor.G, _bgColor.B));
@@ -378,7 +386,8 @@ void Plotter::display(std::vector<sf::RectangleShape> &gridLines,
     const Color bull = bullColors[rand() % bullColors.size()];
     const Color bear = bearColors[rand() % bearColors.size()];
 
-    for (unsigned i = 0; i < cs.size(); ++i) {
+		const unsigned tempItr = (static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) > 0) ? static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) : 0;
+    for (unsigned i = tempItr; i < cs.size(); ++i) {
       if (changeColor) {
         changeColors(cs[i], bull, bear);
       }

@@ -19,7 +19,7 @@ public:
   void yAxisRange(const unsigned y_min, const unsigned y_max);
   void xLabel(const std::string xTitle);
   void yLabel(const std::string yTitle);
-  void title(const std::string uTitle);
+  void __title(const std::string uTitle);
   void genPlot(const std::string param);
   void candleSticks();
 
@@ -31,12 +31,29 @@ private:
   std::string _title;
   unsigned _axesThickness;
   bool _gridsOn;
+
   double _xScaleFactor; // num of pixels for one data point
   double _yScaleFactor;
+
   double _xstep;
   double _ystep;
+
   double _ymin;
   double _ymax;
+
+	int _xBegIdx;
+	int _xEndIdx;
+	int _yBegIdx; // same as y_min
+	int _yEndIdx; // same as y_max
+
+  std::vector<sf::RectangleShape> axes;
+  std::vector<sf::RectangleShape> div;
+  std::vector<sf::Text> labels;
+  sf::Text title;
+  std::vector<sf::RectangleShape> gridLines;
+	std::vector<sf::Text> yDivText; 
+	std::vector<Candlestick> cs;
+
   Pos _origin;
   double _pixelScaleMultiplier;
 
@@ -54,12 +71,7 @@ private:
   sf::Font _font;
 
   void changeColors(Candlestick &cs, const Color bull, const Color bear);
-  void lightModeSwitch(std::vector<sf::RectangleShape> &gridLines,
-                       std::vector<sf::RectangleShape> &axes,
-                       std::vector<sf::Text> &yDivText,
-                       std::vector<sf::Text> &labels, sf::Text &title,
-                       std::vector<sf::RectangleShape> &div,
-											 std::vector<Candlestick> &cs);
+  void lightModeSwitch();
   double getMaximumYData() const;
   double getMinimumYData() const;
   void gatherAdditionalInfo(const std::string &param);
@@ -74,9 +86,6 @@ private:
   sf::Text createTitle();
   std::vector<Candlestick> getCandlesticks();
   double getPixelSizeMultiplier();
-  void display(std::vector<sf::RectangleShape> &gridLines,
-               std::vector<sf::RectangleShape> &axes,
-               std::vector<sf::Text> &yDivText, std::vector<sf::Text> &labels,
-               sf::Text &title, std::vector<sf::RectangleShape> &div,
-               std::vector<Candlestick> &cs);
+  void display();
+	void updateMinIdxs();
 };

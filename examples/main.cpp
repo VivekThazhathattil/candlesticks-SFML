@@ -9,7 +9,7 @@ int main() {
   plot.yAxisRange(0, 500);
   plot.xLabel("Time");
   plot.yLabel("Units");
-  plot.title("Candlestick Chart");
+  plot.__title("Candlestick Chart");
   plot.candleSticks();
   plot.gridOn;
   return 0;

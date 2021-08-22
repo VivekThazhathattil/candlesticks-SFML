@@ -6,7 +6,7 @@ int main() {
   plot.fetchData(filePath);
   plot.xLabel("");
   plot.yLabel("");
-  plot.title("");
+  plot.__title("");
   plot.candleSticks();
   return 0;
 }
