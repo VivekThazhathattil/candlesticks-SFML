@@ -38,6 +38,7 @@ Plotter::Plotter()
   }
 
 	_view.reset(sf::FloatRect(0, 0, PARAMS::WINDOW_SIZE_X, PARAMS::WINDOW_SIZE_Y));
+	//_view.reset(sf::FloatRect(0, 0, getAxesLength().x, getAxesLength().y));
 
   srand(time(0));
 }
@@ -374,6 +375,10 @@ void Plotter::display(){
           changeColor = !changeColor;
         else if (e.key.code == sf::Keyboard::B)
           lightModeSwitch();
+				else if (e.key.code == sf::Keyboard::Add)
+					_view.zoom(0.9f);
+				else if (e.key.code == sf::Keyboard::Subtract)
+					_view.zoom(1.1f);
       }
     }
     _window.clear(sf::Color(_bgColor.R, _bgColor.G, _bgColor.B));
