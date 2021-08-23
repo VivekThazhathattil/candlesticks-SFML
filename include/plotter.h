@@ -89,4 +89,6 @@ private:
   double getPixelSizeMultiplier();
   void display();
 	void updateMinIdxs();
+	Pos getCandlesticksViewportOriginInFractions() const;
+	Pos getCandlesticksViewportSizeInFractions() const;
 };

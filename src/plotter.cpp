@@ -38,12 +38,29 @@ Plotter::Plotter()
   }
 
 	_view.reset(sf::FloatRect(0, 0, PARAMS::WINDOW_SIZE_X, PARAMS::WINDOW_SIZE_Y));
+	_view.setViewport( sf::FloatRect( getCandlesticksViewportOriginInFractions().x, getCandlesticksViewportOriginInFractions().y, getCandlesticksViewportSizeInFractions().x, getCandlesticksViewportSizeInFractions().y) );
 	//_view.reset(sf::FloatRect(0, 0, getAxesLength().x, getAxesLength().y));
 
   srand(time(0));
 }
 
 Plotter::~Plotter() {}
+
+Pos Plotter::getCandlesticksViewportOriginInFractions() const{
+	Pos pos;
+	pos.x = (_window.getSize().x - getAxesLength().x) / ( 2 * _window.getSize().x );
+	pos.y = (_window.getSize().y - getAxesLength().y) / ( 2 * _window.getSize().y );
+	std::cout << pos.x << " " << pos.y << std::endl;
+	return pos;
+}
+
+Pos Plotter::getCandlesticksViewportSizeInFractions() const{
+	Pos pos;
+	pos.x = getAxesLength().x / _window.getSize().x;
+	pos.y = getAxesLength().y / _window.getSize().y;
+	std::cout << pos.x << " " << pos.y << std::endl;
+	return pos;
+}
 
 void Plotter::fetchData(const std::string filePath) {
   DataHandler dh;
@@ -379,6 +396,14 @@ void Plotter::display(){
 					_view.zoom(0.9f);
 				else if (e.key.code == sf::Keyboard::Subtract)
 					_view.zoom(1.1f);
+				else if (e.key.code == sf::Keyboard::Left)
+					_view.move(-10.0f, 0);
+				else if (e.key.code == sf::Keyboard::Right)
+					_view.move(10.0f, 0);
+				else if (e.key.code == sf::Keyboard::Up)
+					_view.move(0, 10.0f);
+				else if (e.key.code == sf::Keyboard::Down)
+					_view.move(0, -10.0f);
       }
     }
     _window.clear(sf::Color(_bgColor.R, _bgColor.G, _bgColor.B));

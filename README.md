@@ -11,6 +11,7 @@ Dependency on SFML, a multimedia library.
 <img src="img/prog4.png" width="400" height="400"/>
 </p>
 
+##### Current development branch: include-sfml-view
 
 #### Keyboard shortcuts (press c to randomize)
 
@@ -18,6 +19,12 @@ Dependency on SFML, a multimedia library.
 |-----|--------------------------------|
 | c   | randomize candle body colors   |
 | b   | toggle between light/dark mode |
+| +		|	Zoom in 											 |
+| -		|	Zoom out 											 |
+| UP	|	Move up 											 |
+| DOWN|	Move down 										 |
+| LEFT|	Move left										   |
+|RIGHT|	Move right 										 |
 
 ### Ideas left to implement (aka TODO):
 * ~~Custom kawaii colors + white bg~~
@@ -38,3 +45,4 @@ Dependency on SFML, a multimedia library.
 * ~~figure out the title of the graph from the file name. Override if custom name specified as command line argument.~~
 * save user preferences in a local file and load that at startup.
 * remove all the pixel scaling for candlesticks and replace it with sf::View functions : which easy to implement zooming and scrolling.
+* implement box zoom functionality
