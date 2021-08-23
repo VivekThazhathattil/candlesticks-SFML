@@ -18,7 +18,7 @@ const unsigned DIV_TEXT_SIZE_Y = 10;
 const unsigned CANDLESTICK_FONT_SIZE = 8;
 const float CANDLESTICK_BODY_WIDTH = WINDOW_SIZE_X / 100;
 const float CANDLESTICK_WICK_WIDTH = WINDOW_SIZE_X / 600;
-const unsigned MAX_CANDLES = 60;
+const unsigned MAX_CANDLES = 500;
 } // namespace PARAMS
 
 #define _MAX(a,b) ( a > b ? a : b )

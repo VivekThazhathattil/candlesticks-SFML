@@ -68,6 +68,7 @@ private:
   bool changeColor;
 
   sf::RenderWindow _window;
+	sf::View _view;
   sf::Font _font;
 
   void changeColors(Candlestick &cs, const Color bull, const Color bear);

@@ -37,3 +37,4 @@ Dependency on SFML, a multimedia library.
 * specify the csv file as a terminal command
 * ~~figure out the title of the graph from the file name. Override if custom name specified as command line argument.~~
 * save user preferences in a local file and load that at startup.
+* remove all the pixel scaling for candlesticks and replace it with sf::View functions : which easy to implement zooming and scrolling.

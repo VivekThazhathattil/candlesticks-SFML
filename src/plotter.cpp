@@ -4,7 +4,7 @@
 Plotter::Plotter()
     : _window(sf::RenderWindow(
           sf::VideoMode(PARAMS::WINDOW_SIZE_X, PARAMS::WINDOW_SIZE_Y),
-          "Candlestick Plot", sf::Style::Close)) {
+          "Candlestick Plot", sf::Style::Close)){
   /* default values */
   _xLabel = "";
   _yLabel = "";
@@ -14,6 +14,10 @@ Plotter::Plotter()
   _yScaleFactor = 1;
   _xstep = 10;
   _ystep = 10;
+	_xBegIdx = 0;
+	_xEndIdx = 0;
+	_yBegIdx = 0;
+	_yEndIdx = 0;
   _ymax = -1;
   _ymin = -1;
   _pixelScaleMultiplier = -1;
@@ -33,7 +37,7 @@ Plotter::Plotter()
     exit(1);
   }
 
-	// get the values for _xBegIdx, _yBegIdx, _xEndIdx, _yEndIdx
+	_view.reset(sf::FloatRect(0, 0, PARAMS::WINDOW_SIZE_X, PARAMS::WINDOW_SIZE_Y));
 
   srand(time(0));
 }
@@ -72,13 +76,13 @@ void Plotter::genPlot(const std::string param) {
     exit(1);
   }
 
-	this->axes = createAxes();
-	this->div = createDivisions(param);
-	this->labels = createLabels();
-	this->title = createTitle();
-	this->gridLines = createGridLines();
-
   if (param.compare("ohlc") == 0) {
+		this->axes = createAxes();
+		this->div = createDivisions(param);
+		this->labels = createLabels();
+		this->title = createTitle();
+		this->gridLines = createGridLines();
+		_xEndIdx = _xData.size() - 1;
     gatherAdditionalInfo(param);
     this->yDivText = getYDivisionLabels();
     this->cs = getCandlesticks();
@@ -88,13 +92,13 @@ void Plotter::genPlot(const std::string param) {
 }
 
 void Plotter::updateMinIdxs(){
-	//_xBegIdx = (static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) > 0)\
+	_xBegIdx = (static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) > 0)\
 						 ? static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) \
 						 : 0;
 	// [dve] temp values
-	_xEndIdx = 0;
-	_yBegIdx = 0;
-	_yEndIdx = 0;
+	_xEndIdx = cs.size()-1;
+	_yBegIdx = getMinimumYData();
+	_yEndIdx = getMaximumYData();
 }
 
 
@@ -164,7 +168,7 @@ void Plotter::gatherAdditionalInfo(const std::string &param) {
 
 double Plotter::getMaximumYData() const {
   double max = -1;
-  for (unsigned i = 0; i < _yData.size(); ++i) {
+  for (unsigned i = _xBegIdx; i <= _xEndIdx; ++i) {
     if (_yData[i][1] > max)
       max = _yData[i][1];
   }
@@ -172,7 +176,7 @@ double Plotter::getMaximumYData() const {
 }
 double Plotter::getMinimumYData() const {
   double min = 1000000;
-  for (unsigned i = 0; i < _yData.size(); ++i) {
+  for (unsigned i = _xBegIdx; i <= _xEndIdx; ++i) {
     if (_yData[i][2] < min)
       min = _yData[i][2];
   }
@@ -386,18 +390,20 @@ void Plotter::display(){
     const Color bull = bullColors[rand() % bullColors.size()];
     const Color bear = bearColors[rand() % bearColors.size()];
 
-		const unsigned tempItr = (static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) > 0) ? static_cast<int>(cs.size()) - static_cast<int>(PARAMS::MAX_CANDLES) : 0;
-    for (unsigned i = tempItr; i < cs.size(); ++i) {
+		_window.setView(_view);
+    for (unsigned i = _xBegIdx; i < _xEndIdx; ++i) {
       if (changeColor) {
         changeColors(cs[i], bull, bear);
       }
       _window.draw(cs[i].getWick());
       _window.draw(cs[i].getBody());
     }
+		//_view.zoom(0.5f);
+		_window.setView(_window.getDefaultView());
     if (changeColor)
       changeColor = !changeColor;
     //-----------------------------------------
-    for (unsigned i = 0; i < cs.size(); ++i) {
+    for (unsigned i = _xBegIdx; i <= _xEndIdx; ++i) {
       if (cs[i].mouseInCandleStick(Pos(sf::Mouse::getPosition(_window).x,
                                        sf::Mouse::getPosition(_window).y))) {
         _window.draw(cs[i].getText());
