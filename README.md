@@ -46,3 +46,4 @@ Dependency on SFML, a multimedia library.
 * save user preferences in a local file and load that at startup.
 * remove all the pixel scaling for candlesticks and replace it with sf::View functions : which easy to implement zooming and scrolling.
 * implement box zoom functionality
+* replace Pos with sfml equivalent to maintain consistency

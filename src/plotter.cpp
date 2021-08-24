@@ -405,6 +405,20 @@ void Plotter::display(){
 				else if (e.key.code == sf::Keyboard::Down)
 					_view.move(0, -10.0f);
       }
+			if (e.type == sf::Event::MouseWheelScrolled){
+				int scrollCount = e.mouseWheelScroll.delta;
+					_view.zoom(1.0f + scrollCount * 0.1f);
+			}
+			if (e.type == sf::Event::MouseButtonPressed)
+				if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+					_mousePressedPos = sf::Mouse::getPosition();
+			if (e.type == sf::Event::MouseButtonReleased){
+				if (e.mouseButton.button == sf::Mouse::Left){
+					_mouseReleasedPos = sf::Mouse::getPosition();
+					sf::Vector2i mouseDelta = _mousePressedPos - _mouseReleasedPos;	
+					_view.move(mouseDelta.x, mouseDelta.y);
+				}
+			}
     }
     _window.clear(sf::Color(_bgColor.R, _bgColor.G, _bgColor.B));
     for (unsigned i = 0; i < gridLines.size(); ++i) {
@@ -428,7 +442,6 @@ void Plotter::display(){
       _window.draw(cs[i].getWick());
       _window.draw(cs[i].getBody());
     }
-		//_view.zoom(0.5f);
 		_window.setView(_window.getDefaultView());
     if (changeColor)
       changeColor = !changeColor;
