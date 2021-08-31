@@ -66,13 +66,13 @@ private:
   bool showSRLevels;
   bool showMACD;
   bool changeColor;
+	bool mouseDrag;
 
   sf::RenderWindow _window;
 	sf::View _view;
   sf::Font _font;
 
 	sf::Vector2i _mousePressedPos; 
-	sf::Vector2i _mouseReleasedPos; 
 
   void changeColors(Candlestick &cs, const Color bull, const Color bear);
   void lightModeSwitch();

@@ -30,8 +30,8 @@ Dependency on SFML, a multimedia library.
 * ~~Custom kawaii colors + white bg~~
 * user input html color codes for backgrounds, bullish candles and bearish candles
 * ~~x-axis markings~~
-* zoomability  (scale time period)
-* horizontal mouse drag to change the time period (also with left/right arrow keys)
+* ~~zoomability~~  (scale time period)
+* ~~horizontal mouse drag to change the time period (also with left/right arrow keys)~~ dynamic change in axes pending
 * detect marubozus, dojis, and other typical single as well as multi-candle patterns.
 * draw MACD, get VWAP
 * indicate volume
@@ -44,6 +44,6 @@ Dependency on SFML, a multimedia library.
 * specify the csv file as a terminal command
 * ~~figure out the title of the graph from the file name. Override if custom name specified as command line argument.~~
 * save user preferences in a local file and load that at startup.
-* remove all the pixel scaling for candlesticks and replace it with sf::View functions : which easy to implement zooming and scrolling.
+* remove all the pixel scaling for candlesticks and replace it with sf::View functions : which makes it easy to implement zooming and scrolling, an resizing windows.
 * implement box zoom functionality
 * replace Pos with sfml equivalent to maintain consistency

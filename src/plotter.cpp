@@ -28,9 +28,12 @@ Plotter::Plotter()
   _axesColor = DarkBG::axesColor;
   _gridColor = DarkBG::gridColor;
 
+	_mousePressedPos = sf::Vector2i(0,0);
+
   showSRLevels = false;
   showMACD = false;
   changeColor = false;
+	mouseDrag = false;
 
   if (!_font.loadFromFile("../res/arial.ttf")) {
     std::cerr << "Error loading font! Exiting...\n";
@@ -382,43 +385,52 @@ void Plotter::display(){
       if (e.type == sf::Event::Closed)
         _window.close();
       if (e.type == sf::Event::KeyPressed) {
-        if (e.key.code == sf::Keyboard::S) {
-          /* show SR levels */
-          showSRLevels = !showSRLevels;
-        } else if (e.key.code == sf::Keyboard::M) {
-          /* show MACD */
-          showMACD = !showMACD;
-        } else if (e.key.code == sf::Keyboard::C)
-          changeColor = !changeColor;
-        else if (e.key.code == sf::Keyboard::B)
-          lightModeSwitch();
-				else if (e.key.code == sf::Keyboard::Add)
-					_view.zoom(0.9f);
-				else if (e.key.code == sf::Keyboard::Subtract)
-					_view.zoom(1.1f);
-				else if (e.key.code == sf::Keyboard::Left)
-					_view.move(-10.0f, 0);
-				else if (e.key.code == sf::Keyboard::Right)
-					_view.move(10.0f, 0);
-				else if (e.key.code == sf::Keyboard::Up)
-					_view.move(0, 10.0f);
-				else if (e.key.code == sf::Keyboard::Down)
-					_view.move(0, -10.0f);
+				switch(e.key.code){
+					case(sf::Keyboard::S):
+          	showSRLevels = !showSRLevels;
+						break;
+					case(sf::Keyboard::M):
+          	showMACD = !showMACD;
+						break;
+					case(sf::Keyboard::C):
+          	changeColor = !changeColor;
+						break;
+					case(sf::Keyboard::B):
+          	lightModeSwitch();
+						break;
+					case(sf::Keyboard::Add):
+						_view.zoom(0.9f);
+						break;
+					case(sf::Keyboard::Subtract):
+						_view.zoom(1.1f);
+						break;
+					case(sf::Keyboard::Left):
+						_view.move(-10.0f, 0);
+						break;
+					case(sf::Keyboard::Right):
+						_view.move(10.0f, 0);
+						break;
+					case(sf::Keyboard::Up):
+						_view.move(0, 10.0f);
+						break;
+					case(sf::Keyboard::Down):
+						_view.move(0, -10.0f);
+						break;
+				}
       }
 			if (e.type == sf::Event::MouseWheelScrolled){
 				int scrollCount = e.mouseWheelScroll.delta;
 					_view.zoom(1.0f + scrollCount * 0.1f);
 			}
 			if (e.type == sf::Event::MouseButtonPressed)
-				if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+				if(sf::Mouse::isButtonPressed(sf::Mouse::Left)){
+					mouseDrag = true;
 					_mousePressedPos = sf::Mouse::getPosition();
-			if (e.type == sf::Event::MouseButtonReleased){
-				if (e.mouseButton.button == sf::Mouse::Left){
-					_mouseReleasedPos = sf::Mouse::getPosition();
-					sf::Vector2i mouseDelta = _mousePressedPos - _mouseReleasedPos;	
-					_view.move(mouseDelta.x, mouseDelta.y);
 				}
-			}
+			if (e.type == sf::Event::MouseButtonReleased){
+					mouseDrag = false;
+					_mousePressedPos = sf::Vector2i(0,0);
+				}
     }
     _window.clear(sf::Color(_bgColor.R, _bgColor.G, _bgColor.B));
     for (unsigned i = 0; i < gridLines.size(); ++i) {
@@ -442,6 +454,12 @@ void Plotter::display(){
       _window.draw(cs[i].getWick());
       _window.draw(cs[i].getBody());
     }
+		if(mouseDrag){
+			sf::Vector2i newMousePos = sf::Mouse::getPosition();
+			sf::Vector2i mouseDelta = _mousePressedPos - newMousePos;
+			_view.move(mouseDelta.x, mouseDelta.y);
+			_mousePressedPos = newMousePos;
+		}
 		_window.setView(_window.getDefaultView());
     if (changeColor)
       changeColor = !changeColor;
