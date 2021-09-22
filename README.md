@@ -26,6 +26,13 @@ Dependency on SFML, a multimedia library.
 | LEFT|	Move left										   |
 |RIGHT|	Move right 										 |
 
+### How to try it out (Instructions for Linux system):
+* clone the repo: Run `git clone https://github.com/VivekThazhathattil/candlesticks-SFML` or download as zip and extract it.
+* change directory: `cd candlesticks-SFML/test`
+* Run the Makefile: `make` from within the `test` directory.
+* Make sure that you have GNU C++ compiler and SFML libs installed within your system.
+* Run the program using `./main`
+
 ### Ideas left to implement (aka TODO):
 * ~~Custom kawaii colors + white bg~~
 * user input html color codes for backgrounds, bullish candles and bearish candles
