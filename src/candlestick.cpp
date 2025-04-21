@@ -1,15 +1,16 @@
-#include "../include/candlestick.h"
+#include "candlestick.h"
+#include <string>
 
 Candlestick::Candlestick(const std::string &x, const std::vector<double> &y,
                          sf::Font &font, const Pos &pos, const Pos &origin,
                          const double &pixelScaleMultiplier,
-                         const Pos &textPos) {
+                         const Pos &textPos)
+                         : _det(font) {
   _open = y[0];
   _high = y[1];
   _low = y[2];
   _close = y[3];
   _x = x;
-  _det.setFont(font);
 
   createBody(pos, origin, pixelScaleMultiplier);
   createWick(pos, origin, pixelScaleMultiplier);
@@ -22,7 +23,7 @@ void Candlestick::createBody(const Pos &pos, const Pos &origin,
   _bodyHeight = fmax(pixelScaleMultiplier * abs(_open - _close), 1);
   double openPos = fmin(pixelScaleMultiplier * abs(_high - _open),
                         pixelScaleMultiplier * abs(_high - _close));
-  _body.setPosition(pos.x, pos.y + openPos);
+  _body.setPosition(sf::Vector2f(pos.x, pos.y + openPos));
   _body.setSize(sf::Vector2f(PARAMS::CANDLESTICK_BODY_WIDTH, _bodyHeight));
   if (_bodyHeight == 1)
     _body.setFillColor(sf::Color(DarkBG::wickColor.R, DarkBG::wickColor.G,
@@ -36,9 +37,9 @@ void Candlestick::createBody(const Pos &pos, const Pos &origin,
 }
 void Candlestick::createWick(const Pos &pos, const Pos &origin,
                              const double &pixelScaleMultiplier) {
-  _wick.setPosition(pos.x + PARAMS::CANDLESTICK_BODY_WIDTH / 2 -
+  _wick.setPosition(sf::Vector2f(pos.x + PARAMS::CANDLESTICK_BODY_WIDTH / 2 -
                         PARAMS::CANDLESTICK_WICK_WIDTH / 2,
-                    pos.y);
+                    pos.y));
   double wickHeight = fmax(pixelScaleMultiplier * abs(_high - _low), 1);
   _wick.setSize(sf::Vector2f(PARAMS::CANDLESTICK_WICK_WIDTH, wickHeight));
   _wick.setFillColor(
@@ -52,8 +53,8 @@ void Candlestick::createText(const Pos &pos) {
                  "\nL: " + std::to_string(int(_low)) +
                  "\nC: " + std::to_string(int(_close)));
   _det.setPosition(
-      sf::Vector2f(pos.x - _det.getLocalBounds().width - PARAMS::OFFSET_X,
-                   pos.y - _det.getLocalBounds().height - PARAMS::OFFSET_Y));
+      sf::Vector2f(pos.x - _det.getLocalBounds().size.x - PARAMS::OFFSET_X,
+                   pos.y - _det.getLocalBounds().size.y - PARAMS::OFFSET_Y));
 	_det.setFillColor(sf::Color(DarkBG::textColor.R, DarkBG::textColor.G, DarkBG::textColor.B));
 }
 bool Candlestick::mouseInCandleStick(const Pos &pos) const {

@@ -12,7 +12,7 @@
 
 class Plotter {
 public:
-  Plotter();
+  Plotter(const sf::Font& font);
   ~Plotter();
   void fetchData(const std::string filePath);
   void xAxisRange(const unsigned x_min, const unsigned x_max);
@@ -22,6 +22,13 @@ public:
   void __title(const std::string uTitle);
   void genPlot(const std::string param);
   void candleSticks();
+
+  void operator()(const sf::Event& in);
+  void operator()(const sf::Event::Closed& in);
+  void operator()(const sf::Event::KeyPressed& in);
+  void operator()(const sf::Event::MouseWheelScrolled& in);
+  void operator()(const sf::Event::MouseButtonPressed& in);
+  void operator()(const sf::Event::MouseButtonReleased& in);
 
 private:
   std::vector<std::string> _xData;
@@ -69,7 +76,7 @@ private:
 	bool mouseDrag;
 
   sf::RenderWindow _window;
-	sf::View _view;
+  sf::View _view;
   sf::Font _font;
 
 	sf::Vector2i _mousePressedPos; 
