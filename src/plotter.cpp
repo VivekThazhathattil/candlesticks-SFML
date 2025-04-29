@@ -1,10 +1,11 @@
-#include "../include/plotter.h"
+#include "plotter.h"
 #include <time.h>
 
-Plotter::Plotter()
+Plotter::Plotter(const sf::Font& font)
     : _window(sf::RenderWindow(
-          sf::VideoMode(PARAMS::WINDOW_SIZE_X, PARAMS::WINDOW_SIZE_Y),
-          "Candlestick Plot", sf::Style::Close)){
+          sf::VideoMode(sf::Vector2u(PARAMS::WINDOW_SIZE_X, PARAMS::WINDOW_SIZE_Y)),
+          "Candlestick Plot", sf::Style::Close)),
+    title(font) {
   /* default values */
   _xLabel = "";
   _yLabel = "";
@@ -35,13 +36,15 @@ Plotter::Plotter()
   changeColor = false;
 	mouseDrag = false;
 
-  if (!_font.loadFromFile("../res/arial.ttf")) {
+  if (!_font.openFromFile("res/arial.ttf")) {
     std::cerr << "Error loading font! Exiting...\n";
     exit(1);
   }
 
-	_view.reset(sf::FloatRect(0, 0, PARAMS::WINDOW_SIZE_X, PARAMS::WINDOW_SIZE_Y));
-	_view.setViewport( sf::FloatRect( getCandlesticksViewportOriginInFractions().x, getCandlesticksViewportOriginInFractions().y, getCandlesticksViewportSizeInFractions().x, getCandlesticksViewportSizeInFractions().y) );
+	_view = sf::View(sf::Rect<float>({0, 0}, {PARAMS::WINDOW_SIZE_X, PARAMS::WINDOW_SIZE_Y}));
+	_view.setViewport( sf::Rect<float>( 
+	    {getCandlesticksViewportOriginInFractions().x, getCandlesticksViewportOriginInFractions().y}, 
+	    {getCandlesticksViewportSizeInFractions().x, getCandlesticksViewportSizeInFractions().y}) );
 	//_view.reset(sf::FloatRect(0, 0, getAxesLength().x, getAxesLength().y));
 
   srand(time(0));
@@ -127,21 +130,19 @@ std::vector<sf::Text> Plotter::getYDivisionLabels() const {
   std::vector<sf::Text> v;
   /* y div labels */
   for (unsigned i = 0; i < PARAMS::NUM_DIVS_Y + 1; ++i) {
-    v.push_back(sf::Text());
-    v.back().setFont(_font);
+    v.push_back(sf::Text(_font));
     v.back().setString(
         std::to_string(int(_ymin + i * (_ymax - _ymin) / PARAMS::NUM_DIVS_Y)));
     v.back().setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
     v.back().setCharacterSize(PARAMS::DIV_TEXT_SIZE_Y);
-    v.back().setOrigin(sf::Vector2f(0, v.back().getLocalBounds().height +
+    v.back().setOrigin(sf::Vector2f(0, v.back().getLocalBounds().size.y +
                                            PARAMS::OFFSET_Y / 2));
     v.back().setPosition(sf::Vector2f(getOrigin().x + PARAMS::OFFSET_X / 2,
                                       getOrigin().y - i * _yScaleFactor));
   }
   /* x div labels */
   for (unsigned i = 0; i < PARAMS::NUM_DIVS_X + 1; ++i) {
-    v.push_back(sf::Text());
-    v.back().setFont(_font);
+    v.push_back(sf::Text(_font));
     float step = float(_xData.size()) / PARAMS::NUM_DIVS_X;
     std::string labelString =
         _xData[(int(i * step) >= _xData.size()) ? _xData.size() - 1
@@ -150,11 +151,11 @@ std::vector<sf::Text> Plotter::getYDivisionLabels() const {
     v.back().setString(labelString);
     v.back().setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
     v.back().setCharacterSize(PARAMS::DIV_TEXT_SIZE_X);
-    v.back().setOrigin(sf::Vector2f(v.back().getLocalBounds().width,
-                                    v.back().getLocalBounds().height));
+    v.back().setOrigin(sf::Vector2f(v.back().getLocalBounds().size.x,
+                                    v.back().getLocalBounds().size.y));
     v.back().setPosition(sf::Vector2f(getOrigin().x + i * _xScaleFactor,
                                       getOrigin().y + PARAMS::OFFSET_Y / 2));
-    v.back().setRotation(-30.0);
+    v.back().setRotation(sf::degrees(-30.0));
   }
   return v;
 }
@@ -165,14 +166,14 @@ std::vector<sf::RectangleShape> Plotter::createGridLines() const {
   Pos origin = getOrigin();
   for (unsigned i = 0; i < PARAMS::NUM_DIVS_Y + 1; ++i) {
     v.push_back(sf::RectangleShape());
-    v.back().setPosition(origin.x, origin.y - i * _yScaleFactor);
+    v.back().setPosition(sf::Vector2f(origin.x, origin.y - i * _yScaleFactor));
     v.back().setFillColor(sf::Color(_gridColor.R, _gridColor.G, _gridColor.B));
     v.back().setSize(sf::Vector2f(getAxesLength().x, 2));
   }
 
   for (unsigned i = 0; i < PARAMS::NUM_DIVS_X + 1; ++i) {
     v.push_back(sf::RectangleShape());
-    v.back().setPosition(origin.x + i * _xScaleFactor, origin.y);
+    v.back().setPosition(sf::Vector2f(origin.x + i * _xScaleFactor, origin.y));
     v.back().setFillColor(sf::Color(_gridColor.R, _gridColor.G, _gridColor.B));
     v.back().setSize(sf::Vector2f(2, -getAxesLength().y));
   }
@@ -248,7 +249,7 @@ std::vector<sf::RectangleShape> Plotter::createAxes() {
   v.back().setPosition(sf::Vector2f(getOrigin().x, getOrigin().y));
 
   if (_axesThickness > 1)
-    v.back().setOrigin(0, float(_axesThickness / 2));
+    v.back().setOrigin(sf::Vector2f(0, float(_axesThickness / 2)));
   v.back().setSize(sf::Vector2f(getAxesLength().x, _axesThickness));
   v.back().setFillColor(sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
 
@@ -257,10 +258,10 @@ std::vector<sf::RectangleShape> Plotter::createAxes() {
   v.back().setPosition(sf::Vector2f(getOrigin().x, getOrigin().y));
 
   if (_axesThickness > 1)
-    v.back().setOrigin(0, float(_axesThickness / 2));
+    v.back().setOrigin(sf::Vector2f(0, float(_axesThickness / 2)));
   v.back().setSize(sf::Vector2f(getAxesLength().y, _axesThickness));
   v.back().setFillColor(sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
-  v.back().setRotation(-90.0);
+  v.back().setRotation(sf::degrees(-90.0));
 
   return v;
 }
@@ -273,16 +274,16 @@ Plotter::createDivisions(const std::string &param) {
   for (unsigned i = 0; i * _xScaleFactor < getAxesLength().x; ++i) {
     v.push_back(sf::RectangleShape());
     v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_X, 1));
-    v.back().setPosition(getOrigin().x + i * _xScaleFactor, getOrigin().y);
-    v.back().setRotation(90.0);
+    v.back().setPosition(sf::Vector2f(getOrigin().x + i * _xScaleFactor, getOrigin().y));
+    v.back().setRotation(sf::degrees(90.0));
 		v.back().setFillColor(sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
   };
   /* y divisions */
   for (unsigned i = 0; i * _yScaleFactor < getAxesLength().y; ++i) {
     v.push_back(sf::RectangleShape());
     v.back().setSize(sf::Vector2f(PARAMS::DIV_SIZE_Y, 1));
-    v.back().setPosition(getOrigin().x, getOrigin().y - i * _yScaleFactor);
-    v.back().setRotation(180.0);
+    v.back().setPosition(sf::Vector2f(getOrigin().x, getOrigin().y - i * _yScaleFactor));
+    v.back().setRotation(sf::degrees(180.0));
 		v.back().setFillColor(sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
   };
   return v;
@@ -302,33 +303,33 @@ std::vector<sf::Text> Plotter::createLabels() {
   std::vector<sf::Text> v;
 
   /* xlabel */
-  v.push_back(sf::Text(_xLabel, _font, PARAMS::LABEL_SIZE_X));
+  v.push_back(sf::Text(_font, _xLabel, PARAMS::LABEL_SIZE_X));
   v.back().setPosition(sf::Vector2f(getOrigin().x + getAxesLength().x / 2 -
-                                        v.back().getLocalBounds().width / 2,
+                                        v.back().getLocalBounds().size.x / 2,
                                     getOrigin().y + PARAMS::OFFSET_Y));
 	v.back().setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
   //	v.back().setOrigin( v.back().getGlobalBounds().width/2
   //,PARAMS::LABEL_SIZE_X/2);
 
   /* y label */
-  v.push_back(sf::Text(_yLabel, _font, PARAMS::LABEL_SIZE_Y));
-  v.back().setOrigin(v.back().getLocalBounds().width / 2,
-                     v.back().getLocalBounds().height / 2);
+  v.push_back(sf::Text(_font, _yLabel, PARAMS::LABEL_SIZE_Y));
+  v.back().setOrigin(sf::Vector2f(v.back().getLocalBounds().size.x / 2,
+                     v.back().getLocalBounds().size.y / 2));
   v.back().setPosition(sf::Vector2f(
-      getOrigin().x - v.back().getLocalBounds().height / 2 - PARAMS::OFFSET_Y,
+      getOrigin().x - v.back().getLocalBounds().size.y / 2 - PARAMS::OFFSET_Y,
       getOrigin().y - getAxesLength().y / 2));
 	v.back().setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
   //	v.back().setOrigin( v.back().getGlobalBounds().width/2
   //,PARAMS::LABEL_SIZE_Y/2);
-  v.back().setRotation(-90.0);
+  v.back().setRotation(sf::degrees(-90.0));
 
   return v;
 }
 
 sf::Text Plotter::createTitle() {
-  sf::Text t(_title, _font, PARAMS::TITLE_SIZE);
+  sf::Text t(_font, _title, PARAMS::TITLE_SIZE);
   t.setPosition(
-      sf::Vector2f(PARAMS::WINDOW_SIZE_X / 2 - t.getLocalBounds().width / 2,
+      sf::Vector2f(PARAMS::WINDOW_SIZE_X / 2 - t.getLocalBounds().size.x / 2,
                    PARAMS::OFFSET_Y));
   t.setFillColor(sf::Color(_textColor.R, _textColor.G, _textColor.B));
   return t;
@@ -371,66 +372,79 @@ void Plotter::lightModeSwitch(){
         sf::Color(_axesColor.R, _axesColor.G, _axesColor.B));
 
 }
-void Plotter::display(){
+void Plotter::operator()(const sf::Event& in) { }
+void Plotter::operator()(const sf::Event::Closed& in)
+{
+  _window.close();
+}
+void Plotter::operator()(const sf::Event::KeyPressed& in)
+{
+  switch(in.code)
+  {
+    case(sf::Keyboard::Key::S):
+      showSRLevels = !showSRLevels;
+      break;
+    case(sf::Keyboard::Key::M):
+      showMACD = !showMACD;
+      break;
+    case(sf::Keyboard::Key::C):
+      changeColor = !changeColor;
+      break;
+    case(sf::Keyboard::Key::B):
+      lightModeSwitch();
+      break;
+    case(sf::Keyboard::Key::Add):
+      _view.zoom(0.9f);
+      break;
+    case(sf::Keyboard::Key::Subtract):
+      _view.zoom(1.1f);
+      break;
+    case(sf::Keyboard::Key::Left):
+      _view.move(sf::Vector2f(-10.0f, 0));
+      break;
+    case(sf::Keyboard::Key::Right):
+      _view.move(sf::Vector2f(10.0f, 0));
+      break;
+    case(sf::Keyboard::Key::Up):
+      _view.move(sf::Vector2f(0, 10.0f));
+      break;
+    case(sf::Keyboard::Key::Down):
+      _view.move(sf::Vector2f(0, -10.0f));
+      break;
+    default:
+      break;
+  }
+}
+void Plotter::operator()(const sf::Event::MouseWheelScrolled& in)
+{
+  int scrollCount = in.delta;
+  _view.zoom(1.0f + scrollCount * 0.1f);
+}
+void Plotter::operator()(const sf::Event::MouseButtonPressed& in)
+{
+  if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+    mouseDrag = true;
+    _mousePressedPos = sf::Mouse::getPosition();
+  }
+}
+void Plotter::operator()(const sf::Event::MouseButtonReleased& in)
+{
+  mouseDrag = false;
+  _mousePressedPos = sf::Vector2i(0,0);
+}
+
+void Plotter::display()
+{
   _window.setPosition(
-      sf::Vector2i(int(sf::VideoMode::getDesktopMode().width / 2 -
+      sf::Vector2i(int(sf::VideoMode::getDesktopMode().size.x / 2 -
                        PARAMS::WINDOW_SIZE_X / 2),
-                   int(sf::VideoMode::getDesktopMode().height / 2 -
+                   int(sf::VideoMode::getDesktopMode().size.y / 2 -
                        PARAMS::WINDOW_SIZE_Y / 2)));
   _window.setFramerateLimit(PARAMS::FRAME_LIMIT);
 
   while (_window.isOpen()) {
-    sf::Event e;
-    while (_window.pollEvent(e)) {
-      if (e.type == sf::Event::Closed)
-        _window.close();
-      if (e.type == sf::Event::KeyPressed) {
-				switch(e.key.code){
-					case(sf::Keyboard::S):
-          	showSRLevels = !showSRLevels;
-						break;
-					case(sf::Keyboard::M):
-          	showMACD = !showMACD;
-						break;
-					case(sf::Keyboard::C):
-          	changeColor = !changeColor;
-						break;
-					case(sf::Keyboard::B):
-          	lightModeSwitch();
-						break;
-					case(sf::Keyboard::Add):
-						_view.zoom(0.9f);
-						break;
-					case(sf::Keyboard::Subtract):
-						_view.zoom(1.1f);
-						break;
-					case(sf::Keyboard::Left):
-						_view.move(-10.0f, 0);
-						break;
-					case(sf::Keyboard::Right):
-						_view.move(10.0f, 0);
-						break;
-					case(sf::Keyboard::Up):
-						_view.move(0, 10.0f);
-						break;
-					case(sf::Keyboard::Down):
-						_view.move(0, -10.0f);
-						break;
-				}
-      }
-			if (e.type == sf::Event::MouseWheelScrolled){
-				int scrollCount = e.mouseWheelScroll.delta;
-					_view.zoom(1.0f + scrollCount * 0.1f);
-			}
-			if (e.type == sf::Event::MouseButtonPressed)
-				if(sf::Mouse::isButtonPressed(sf::Mouse::Left)){
-					mouseDrag = true;
-					_mousePressedPos = sf::Mouse::getPosition();
-				}
-			if (e.type == sf::Event::MouseButtonReleased){
-					mouseDrag = false;
-					_mousePressedPos = sf::Vector2i(0,0);
-				}
+    while (std::optional<sf::Event> e = _window.pollEvent()) {
+      e->visit(*this);
     }
     _window.clear(sf::Color(_bgColor.R, _bgColor.G, _bgColor.B));
     for (unsigned i = 0; i < gridLines.size(); ++i) {
@@ -457,7 +471,7 @@ void Plotter::display(){
 		if(mouseDrag){
 			sf::Vector2i newMousePos = sf::Mouse::getPosition();
 			sf::Vector2i mouseDelta = _mousePressedPos - newMousePos;
-			_view.move(mouseDelta.x, mouseDelta.y);
+			_view.move(sf::Vector2f(mouseDelta.x, mouseDelta.y));
 			_mousePressedPos = newMousePos;
 		}
 		_window.setView(_window.getDefaultView());
